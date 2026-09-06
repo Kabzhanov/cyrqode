@@ -253,7 +253,8 @@ TYPE_HINT_TABLE_REV = {v: k for k, v in TYPE_HINT_TABLE.items()}
 # неизменяемой строкой, навечно зашитой в каждую метку" — поэтому здесь
 # компактный код маршрутизации, а не URL/домен.
 RESOLVER_HINT_TABLE: Dict[str, int] = {
-    "default": 0,  # маршрутизация через глобальный BizDNAi resolver policy
+    "default": 0,          # маршрутизация через глобальный BizDNAi resolver policy
+    "public-registry": 1,  # публичный реестр записей (сейчас — репозиторий на GitHub)
 }
 RESOLVER_HINT_TABLE_REV = {v: k for k, v in RESOLVER_HINT_TABLE.items()}
 

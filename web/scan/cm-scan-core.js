@@ -60,7 +60,7 @@
     0: "unspecified", 1: "product", 2: "batch", 3: "document", 4: "asset",
     5: "vehicle", 6: "building", 7: "badge", 8: "device", 9: "material",
   };
-  var RESOLVER_HINT_TABLE_REV = { 0: "default" };
+  var RESOLVER_HINT_TABLE_REV = { 0: "default", 1: "public-registry" };
 
   // Sector state grammar — §8, cm_encoder.py STATE_*
   var STATE_EMPTY = 0, STATE_INNER = 1, STATE_OUTER = 2, STATE_FULL = 3;

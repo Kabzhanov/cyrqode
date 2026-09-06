@@ -8,7 +8,19 @@
   "use strict";
 
   var EXPECTED_NAMESPACE_INFO = null; // не проверяем реестр — просто предупреждаем в тексте
-  var GITHUB_REGISTRY_BASE = "https://github.com/Kabzhanov/circlemark/blob/main/registry/";
+  // Адрес реестра знает СКАНЕР, а не марка: в марку зашит лишь код резолвера
+  // (см. resolver_hint). Поэтому переезд реестра не обесценивает выпущенные
+  // марки — обновляется только эта таблица.
+  var REGISTRY_BY_RESOLVER = {
+    "default": "https://github.com/Kabzhanov/cyrqode/blob/main/registry/",
+    "public-registry": "https://github.com/Kabzhanov/cyrqode/blob/main/registry/",
+  };
+  var GITHUB_REGISTRY_BASE = REGISTRY_BY_RESOLVER["default"];
+
+  function registryUrlFor(payload) {
+    var base = (payload && REGISTRY_BY_RESOLVER[payload.resolver_hint]) || GITHUB_REGISTRY_BASE;
+    return base + (payload ? payload.entity_id : "") + ".json";
+  }
 
   var els = {
     app: document.getElementById("app"),

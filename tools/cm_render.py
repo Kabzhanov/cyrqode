@@ -295,6 +295,7 @@ def render_svg(
     accent_color: str = "#4800FF",
     center_logo_path: str | None = None,
     title: str = "BizDNAi Circle Mark",
+    record_url: str | None = None,
 ) -> str:
     """Рендерит sectors (см. cm_encoder.to_sectors) в самодостаточный SVG.
 
@@ -329,9 +330,16 @@ def render_svg(
 
     safe_title = saxutils.escape(title)
 
+    # Ссылка на запись живёт в МЕТАДАННЫХ ФАЙЛА, а не в кодовой области знака:
+    # в саму марку зашит лишь код резолвера, поэтому переезд реестра не
+    # обесценивает выпущенные метки. Здесь ссылка нужна человеку, который
+    # откроет svg и захочет понять, что это за знак.
+    record_desc = (
+        f" Record: {saxutils.escape(record_url)}" if record_url else ""
+    )
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {CANVAS} {CANVAS}" width="{CANVAS}" height="{CANVAS}">
 <title>{safe_title}</title>
-<desc>BizDNAi Circle Mark — draft v0.1 (engineering prototype, encoding profile cm-v0.1-draft-a). Geometry is provisional, not a final print/engraving standard.</desc>
+<desc>BizDNAi Circle Mark — draft v0.1 (engineering prototype, encoding profile cm-v0.1-draft-a). Geometry is provisional, not a final print/engraving standard.{record_desc}</desc>
 <rect x="0" y="0" width="{CANVAS}" height="{CANVAS}" fill="{background}"/>
 <g id="cm-border-ring">
 {border_svg}
@@ -379,6 +387,9 @@ def _build_arg_parser() -> argparse.ArgumentParser:
                          "(не меняет data/orientation/parity кольца — они всегда монохромны)")
     p.add_argument("--ink", default="#04101F", help="основной цвет data-элементов")
     p.add_argument("--background", default="#FFFFFF")
+    p.add_argument("--record-url", default=None, metavar="URL",
+                   help="ссылка на запись реестра; попадает в метаданные файла, "
+                        "а НЕ в кодовую область знака")
     p.add_argument("--center-logo", default=None, metavar="PATH",
                     help="по умолчанию ВЫКЛЮЧЕНО: путь к PNG/JPEG/SVG/WebP-логотипу, "
                          "встраиваемому как data: URI в белое кольцо CM Core вместо точки. "
@@ -405,6 +416,7 @@ def main(argv=None) -> int:
         background=args.background,
         accent_core=args.accent_core,
         center_logo_path=args.center_logo,
+        record_url=args.record_url,
         title=f"BizDNAi Circle Mark — {args.entity_id}",
     )
 
