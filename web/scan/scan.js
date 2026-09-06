@@ -11,15 +11,22 @@
   // Адрес реестра знает СКАНЕР, а не марка: в марку зашит лишь код резолвера
   // (см. resolver_hint). Поэтому переезд реестра не обесценивает выпущенные
   // марки — обновляется только эта таблица.
+  // Человеку показываем СТРАНИЦУ записи, а не JSON: json — формат для машин.
+  // Сырые данные доступны отдельной ссылкой на самой странице.
   var REGISTRY_BY_RESOLVER = {
-    "default": "https://github.com/Kabzhanov/cyrqode/blob/main/registry/",
-    "public-registry": "https://github.com/Kabzhanov/cyrqode/blob/main/registry/",
+    "default": "https://bizdnai.com/cyrqode/r/",
+    "public-registry": "https://bizdnai.com/cyrqode/r/",
   };
+  var RAW_REGISTRY_BASE = "https://github.com/Kabzhanov/cyrqode/blob/main/registry/";
   var GITHUB_REGISTRY_BASE = REGISTRY_BY_RESOLVER["default"];
 
   function registryUrlFor(payload) {
     var base = (payload && REGISTRY_BY_RESOLVER[payload.resolver_hint]) || GITHUB_REGISTRY_BASE;
-    return base + (payload ? payload.entity_id : "") + ".json";
+    return base + (payload ? payload.entity_id : "") + "/";
+  }
+
+  function rawRecordUrlFor(payload) {
+    return RAW_REGISTRY_BASE + (payload ? payload.entity_id : "") + ".json";
   }
 
   var els = {
