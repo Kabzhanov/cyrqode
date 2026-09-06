@@ -232,7 +232,15 @@ p.result-text { font-size: 15px; color: var(--muted); margin: 0; max-width: 380p
 }
 .result-fields .row { display: flex; justify-content: space-between; gap: 12px; }
 .result-fields .k { color: var(--muted); }
-.result-fields .v { font-weight: 600; word-break: break-all; text-align: right; }
+.result-fields .v { font-weight: 600; word-break: break-all; overflow-wrap: anywhere; text-align: right; }
+
+/* На узком экране пара «ключ — значение» в одну строку не помещается:
+   идентификатор и адрес записи длинные и вылезают за край. Складываем в
+   столбик и выравниваем по левому краю — читается заметно лучше. */
+@media (max-width: 480px) {
+  .result-fields .row { flex-direction: column; gap: 2px; }
+  .result-fields .v { text-align: left; font-size: 13px; }
+}
 
 .primary-btn {
   display: inline-block;

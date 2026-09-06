@@ -21,14 +21,30 @@ h1 { font-size:26px; line-height:1.25; margin:16px 0 4px; }
 dl { display:grid; grid-template-columns:minmax(120px,auto) 1fr; gap:8px 16px; margin:0; }
 dt { color:var(--muted); }
 dd { margin:0; overflow-wrap:anywhere; }
-code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px;
+  overflow-wrap:anywhere; word-break:break-all; }
 .doc { padding:12px 0; border-top:1px solid var(--line); }
 .doc:first-of-type { border-top:0; padding-top:0; }
 .doc b { font-weight:600; display:block; }
-.hash { color:var(--muted); font-size:12px; }
+.hash { color:var(--muted); font-size:12px; display:block; margin-top:4px;
+  overflow-wrap:anywhere; word-break:break-all; }
 .note { color:var(--muted); font-size:14px; }
 a { color:var(--accent); }
 footer { margin-top:32px; color:var(--muted); font-size:13px; }
+/* Телефон — основной сценарий: человек сканирует метку в магазине или цеху.
+   Двухколоночные списки на узком экране разъезжаются, а хэши и идентификаторы
+   вылезают за край, поэтому на узких экранах колонки складываются в одну. */
+@media (max-width: 560px) {
+  body { padding:16px 12px 48px; }
+  .wrap { max-width:100%; }
+  h1 { font-size:22px; }
+  .card { padding:14px; border-radius:12px; }
+  dl, .rows { grid-template-columns:1fr; gap:2px 0; }
+  dl dt, .rows div:nth-child(odd) { font-size:13px; margin-top:10px; }
+  dl dd, .rows div:nth-child(even) { margin-bottom:2px; }
+  .big { font-size:18px; }
+  code { font-size:12px; }
+}
 .hero { font-size:15px; }
 .big { font-size:20px; font-weight:600; margin:2px 0 0; }
 .rows { display:grid; grid-template-columns:minmax(140px,auto) 1fr; gap:8px 16px; }
