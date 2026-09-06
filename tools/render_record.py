@@ -70,6 +70,14 @@ ul.comp { margin:0; padding-left:20px; }
   .fresh.bad { background:#3a1717; color:#ff9a9a; }
 }
 .warn { border-left:3px solid var(--accent); padding-left:12px; }
+.top { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.top img { width:44px; height:44px; }
+.top .name { font-weight:700; letter-spacing:.04em; font-size:18px; }
+.top .kind { color:var(--muted); font-size:13px; }
+.owner { display:flex; align-items:center; gap:10px; margin-top:20px;
+  padding-top:18px; border-top:1px solid var(--line); }
+.owner img { width:28px; height:28px; }
+.owner span { color:var(--muted); font-size:13px; }
 """
 
 
@@ -139,7 +147,10 @@ def render(record: dict, json_url: str) -> str:
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(p.get('title','Record'))} — CYRQODE</title>
 <style>{CSS}</style></head><body><div class="wrap">
-<span class="badge">CYRQODE record</span>
+<div class="top">
+  <img src="/cyrqode/assets/cyrqode-symbol.png" alt="CYRQODE">
+  <div><div class="name">CYRQODE</div><div class="kind">запись реестра</div></div>
+</div>
 <h1>{e(p.get('title',''))}</h1>
 <p class="sub">{e(p.get('date',''))} · {e(p.get('author',''))}{
     ' · ' + e(p.get('author_role','')) if p.get('author_role') else ''}</p>
@@ -166,6 +177,10 @@ def render(record: dict, json_url: str) -> str:
 
 <footer>
 <p><a href="{e(json_url)}">Raw record (JSON)</a> · the machine-readable source of this page.</p>
+<div class="owner">
+  <img src="/cyrqode/assets/bizdnai-logo.png" alt="BizDNAi">
+  <span>Технология BizDNAi</span>
+</div>
 <p>Proof level {e(record.get('proof_level','PL-0'))}: an owner statement. Signatures and
 independent witnessing are a later layer, and this page does not pretend otherwise.</p>
 </footer>

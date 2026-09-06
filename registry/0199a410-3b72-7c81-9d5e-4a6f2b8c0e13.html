@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record — CYRQODE</title>
+<style>
+:root { --ink:#04101F; --accent:#4800FF; --muted:#5a6472; --line:#e3e6ec; --bg:#ffffff; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#eef1f6; --accent:#8f6bff; --muted:#9aa4b2; --line:#232833; --bg:#0d1117; }
+}
+* { box-sizing:border-box; }
+body { margin:0; padding:24px 16px 64px; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:720px; margin:0 auto; }
+.badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
+  letter-spacing:.06em; text-transform:uppercase; background:var(--accent); color:#fff; }
+h1 { font-size:26px; line-height:1.25; margin:16px 0 4px; }
+.sub { color:var(--muted); margin:0 0 28px; }
+.card { border:1px solid var(--line); border-radius:14px; padding:18px; margin:0 0 16px; }
+.card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--muted); margin:0 0 12px; font-weight:600; }
+dl { display:grid; grid-template-columns:minmax(120px,auto) 1fr; gap:8px 16px; margin:0; }
+dt { color:var(--muted); }
+dd { margin:0; overflow-wrap:anywhere; }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; }
+.doc { padding:12px 0; border-top:1px solid var(--line); }
+.doc:first-of-type { border-top:0; padding-top:0; }
+.doc b { font-weight:600; display:block; }
+.hash { color:var(--muted); font-size:12px; }
+.note { color:var(--muted); font-size:14px; }
+a { color:var(--accent); }
+footer { margin-top:32px; color:var(--muted); font-size:13px; }
+.hero { font-size:15px; }
+.big { font-size:20px; font-weight:600; margin:2px 0 0; }
+.rows { display:grid; grid-template-columns:minmax(140px,auto) 1fr; gap:8px 16px; }
+.rows div:nth-child(odd) { color:var(--muted); }
+ul.comp { margin:0; padding-left:20px; }
+.fresh { display:inline-block; padding:6px 12px; border-radius:10px; font-weight:600; }
+.fresh.ok { background:#e7f7ec; color:#0d6b2f; }
+.fresh.bad { background:#fdeaea; color:#8f1d1d; }
+@media (prefers-color-scheme: dark) {
+  .fresh.ok { background:#123021; color:#7fe0a3; }
+  .fresh.bad { background:#3a1717; color:#ff9a9a; }
+}
+.warn { border-left:3px solid var(--accent); padding-left:12px; }
+.top { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.top img { width:44px; height:44px; }
+.top .name { font-weight:700; letter-spacing:.04em; font-size:18px; }
+.top .kind { color:var(--muted); font-size:13px; }
+.owner { display:flex; align-items:center; gap:10px; margin-top:20px;
+  padding-top:18px; border-top:1px solid var(--line); }
+.owner img { width:28px; height:28px; }
+.owner span { color:var(--muted); font-size:13px; }
+</style></head><body><div class="wrap">
+<div class="top">
+  <img src="/cyrqode/assets/cyrqode-symbol.png" alt="CYRQODE">
+  <div><div class="name">CYRQODE</div><div class="kind">запись реестра</div></div>
+</div>
+<h1></h1>
+<p class="sub"> · </p>
+
+
+<div class="card hero">
+  <h2>Продукт</h2>
+  <p class="big">Молоко питьевое пастеризованное 3,2 %</p>
+  <p class="sub" style="margin:6px 0 0">Демонстрационный молочный завод, Казахстан</p>
+  <p>Молоко цельное пастеризованное, без восстановления из сухого. Партия выпущена в утреннюю смену и прослеживается до приёмки сырого молока.</p>
+  <p><span class="fresh" id="freshness" data-best="2026-09-16T04:20:00Z">Годен до 2026-09-16</span></p>
+</div>
+
+<div class="card"><h2>Партия</h2><div class="rows">
+  <div>Номер партии</div><div>L2609-06</div>
+  <div>Выпущена</div><div>2026-09-06 04:20</div>
+  <div>Годен до</div><div>2026-09-16 04:20</div>
+  <div>Хранение</div><div>От +2 до +6 °C. После вскрытия хранить не более 48 часов.</div>
+  <div>Площадка</div><div>Цех розлива № 1</div>
+  <div>Идентификатор</div><div><code>000000000000</code></div>
+</div></div>
+
+<div class="card"><h2>Характеристики</h2><div class="rows"><div>Жирность</div><div>3,2 %</div><div>Объём</div><div>930 мл</div><div>Вид обработки</div><div>Пастеризация 76 °C, 20 с</div><div>Упаковка</div><div>Пюр-пак с крышкой</div></div></div>
+<div class="card"><h2>Состав</h2><ul class="comp"><li>молоко цельное нормализованное</li></ul></div>
+<div class="card"><h2>Пищевая ценность на 100 мл</h2><div class="rows"><div>Белки, г</div><div>3.0</div><div>Жиры, г</div><div>3.2</div><div>Углеводы, г</div><div>4.7</div><div>Энергетическая ценность, ккал</div><div>60</div></div></div>
+<div class="card"><h2>Документы</h2><div class="doc"><b>Декларация о соответствии ТР ТС 033/2013</b><span class="hash">ЕАЭС N KZ Д-DEMO.00.00000</span></div></div>
+
+
+
+
+
+<div class="card"><h2>Identity</h2><dl>
+<dt>Entity</dt><dd><code>0199a410-3b72-7c81-9d5e-4a6f2b8c0e13</code></dd>
+<dt>Namespace</dt><dd>demo</dd>
+<dt>Event</dt><dd><code>0199a410-4c83-7d92-ae6f-5b7a3c9d1f24</code></dd>
+<dt>Type</dt><dd>product.batch.released.v1</dd>
+<dt>Time</dt><dd>2026-09-06T04:20:00Z</dd>
+<dt>Proof level</dt><dd>PL-0</dd>
+</dl></div>
+
+
+
+<div class="card"><h2>Why the mark carries no data</h2>
+<p class="note">ДЕМОНСТРАЦИОННАЯ ЗАПИСЬ. Производитель вымышлен, данные приведены как пример того, что покупатель увидит, отсканировав марку на упаковке. Это не сведения о реальном продукте.</p></div>
+
+<footer>
+<p><a href="https://github.com/Kabzhanov/cyrqode/blob/main/registry/0199a410-3b72-7c81-9d5e-4a6f2b8c0e13.json">Raw record (JSON)</a> · the machine-readable source of this page.</p>
+<div class="owner">
+  <img src="/cyrqode/assets/bizdnai-logo.png" alt="BizDNAi">
+  <span>Технология BizDNAi</span>
+</div>
+<p>Proof level PL-0: an owner statement. Signatures and
+independent witnessing are a later layer, and this page does not pretend otherwise.</p>
+</footer>
+</div>
+<script>
+/* Единственный скрипт на странице: сравнить срок годности с датой устройства.
+   Без него пришлось бы либо промолчать о свежести, либо утверждать её, не зная
+   сегодняшнего числа. */
+(function () {
+  var el = document.getElementById("freshness");
+  if (!el) return;
+  var best = new Date(el.getAttribute("data-best"));
+  if (isNaN(best)) return;
+  var expired = best < new Date();
+  el.className = "fresh " + (expired ? "bad" : "ok");
+  el.textContent = (expired ? "Срок истёк " : "Годен до ") + best.toLocaleDateString();
+})();
+</script>
+
+</body></html>

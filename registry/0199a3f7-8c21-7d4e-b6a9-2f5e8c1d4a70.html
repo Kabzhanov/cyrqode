@@ -29,10 +29,35 @@ code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; 
 .note { color:var(--muted); font-size:14px; }
 a { color:var(--accent); }
 footer { margin-top:32px; color:var(--muted); font-size:13px; }
+.hero { font-size:15px; }
+.big { font-size:20px; font-weight:600; margin:2px 0 0; }
+.rows { display:grid; grid-template-columns:minmax(140px,auto) 1fr; gap:8px 16px; }
+.rows div:nth-child(odd) { color:var(--muted); }
+ul.comp { margin:0; padding-left:20px; }
+.fresh { display:inline-block; padding:6px 12px; border-radius:10px; font-weight:600; }
+.fresh.ok { background:#e7f7ec; color:#0d6b2f; }
+.fresh.bad { background:#fdeaea; color:#8f1d1d; }
+@media (prefers-color-scheme: dark) {
+  .fresh.ok { background:#123021; color:#7fe0a3; }
+  .fresh.bad { background:#3a1717; color:#ff9a9a; }
+}
+.warn { border-left:3px solid var(--accent); padding-left:12px; }
+.top { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.top img { width:44px; height:44px; }
+.top .name { font-weight:700; letter-spacing:.04em; font-size:18px; }
+.top .kind { color:var(--muted); font-size:13px; }
+.owner { display:flex; align-items:center; gap:10px; margin-top:20px;
+  padding-top:18px; border-top:1px solid var(--line); }
+.owner img { width:28px; height:28px; }
+.owner span { color:var(--muted); font-size:13px; }
 </style></head><body><div class="wrap">
-<span class="badge">CYRQODE record</span>
+<div class="top">
+  <img src="/cyrqode/assets/cyrqode-symbol.png" alt="CYRQODE">
+  <div><div class="name">CYRQODE</div><div class="kind">запись реестра</div></div>
+</div>
 <h1>CYRQODE: birth of the technology</h1>
 <p class="sub">2026-09-06 · Rashid Kabzhanov · owner, BizDNAi</p>
+
 
 <div class="card"><h2>What happened</h2><p>First record of the CYRQODE journal. On this day the technology got its name, its symbol and its written specifications: the BUIP protocol, the Circle Mark physical sign, and the encoder-scanner-decoder chain. This entry exists to be the first thing the technology ever proved: its own beginning.</p></div>
 
@@ -59,7 +84,12 @@ footer { margin-top:32px; color:var(--muted); font-size:13px; }
 
 <footer>
 <p><a href="https://github.com/Kabzhanov/cyrqode/blob/main/registry/0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70.json">Raw record (JSON)</a> · the machine-readable source of this page.</p>
+<div class="owner">
+  <img src="/cyrqode/assets/bizdnai-logo.png" alt="BizDNAi">
+  <span>Технология BizDNAi</span>
+</div>
 <p>Proof level PL-0: an owner statement. Signatures and
 independent witnessing are a later layer, and this page does not pretend otherwise.</p>
 </footer>
-</div></body></html>
+</div>
+</body></html>
