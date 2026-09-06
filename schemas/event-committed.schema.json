@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyrqode.dev/schemas/v0.1/event-committed.schema.json",
+  "title": "Событие, принятое в журнал",
+  "description": "Событие после приёма сервером. К ядру добавляются поля, которые может проставить только принимающая сторона: время получения, время фиксации и позиция в потоке. Клиент такое событие сформировать не может и не должен.",
+  "allOf": [
+    {
+      "$ref": "https://cyrqode.dev/schemas/v0.1/event.schema.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "received_time",
+        "committed_time",
+        "stream_sequence"
+      ]
+    }
+  ]
+}

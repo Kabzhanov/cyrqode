@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cyrqode.dev/schemas/v0.1/event.schema.json",
   "title": "Circle Mark Canonical Event (core)",
-  "description": "Ядро канонического события BUIP. Источники: спецификация BUIP v0.1 раздел 6.4 (Event) и раздел 7 (Canonical Event Format), а также производственный профиль BUIP раздел 6 (общий конверт события) — за вычетом производственно-специфичных полей. Это ЯДРО: оно НЕ содержит tech_card_revision_ref/recipe_revision_ref/order_ref/operation_ref и любых других отраслевых полей — они подключаются отдельными профилями через allOf/$ref (см. schemas/profile-manufacturing.schema.json). Ядро остаётся пригодным для банков, логистики, документов, AI-агентов и любых будущих отраслей без изменения.\n\nПримечание по именованию: протокольное ТЗ (6.4) использует 'subject/entity_id', 'actor_id', 'authority_scope', 'sequence'; производственное ТЗ (раздел 6) — 'subject_entity_id', 'actor_entity_id', 'actor_authority_scope', 'stream_sequence', 'namespace'. Схема нормализует имена к более развёрнутым формам производственного конверта и к 'namespace_id' (как в entity.schema.json) для консистентности между схемами; семантика полей не меняется.\n\nАлгоритм подписи НЕ выбран владельцем протокола на момент версии 0.1. Поля crypto_suite и signature намеренно оставлены типом string без enum/формата — конкретный криптографический профиль (алгоритм, кодировка, key id) фиксируется отдельным решением (см. раздел 15.2 протокольного ТЗ, Crypto Suite Registry) и последующим обновлением схемы через schema_version, а не домысливается здесь.",
+  "description": "Ядро канонического события BUIP. Источники: спецификация BUIP v0.1 раздел 6.4 (Event) и раздел 7 (Canonical Event Format), а также производственный профиль BUIP раздел 6 (общий конверт события) — за вычетом производственно-специфичных полей. Это ЯДРО: оно НЕ содержит tech_card_revision_ref/recipe_revision_ref/order_ref/operation_ref и любых других отраслевых полей — они подключаются отдельными профилями через allOf/$ref (см. schemas/profile-manufacturing.schema.json). Ядро остаётся пригодным для банков, логистики, документов, AI-агентов и любых будущих отраслей без изменения.\n\nПримечание по именованию: протокольное ТЗ (6.4) использует 'subject/entity_id', 'actor_id', 'authority_scope', 'sequence'; производственное ТЗ (раздел 6) — 'subject_entity_id', 'actor_entity_id', 'actor_authority_scope', 'stream_sequence', 'namespace'. Схема нормализует имена к более развёрнутым формам производственного конверта и к 'namespace_id' (как в entity.schema.json) для консистентности между схемами; семантика полей не меняется.\n\nАлгоритм подписи НЕ выбран владельцем протокола на момент версии 0.1. Поля crypto_suite и signature намеренно оставлены типом string без enum/формата — конкретный криптографический профиль (алгоритм, кодировка, key id) фиксируется отдельным решением (см. раздел 15.2 протокольного ТЗ, Crypto Suite Registry) и последующим обновлением схемы через schema_version, а не домысливается здесь.\n\nПоля received_time, committed_time и stream_sequence проставляет СЕРВЕР при приёме события: у клиента в момент формирования и подписания их ещё не существует. Поэтому в ядре они не обязательны — обязательными их делает схема event-committed.schema.json, описывающая событие, уже принятое в журнал. Практическое следствие: подпись клиента покрывает только клиентские поля, и проверять её нужно по тому же набору, а не по записи из журнала целиком.",
   "type": "object",
   "properties": {
     "event_id": {
@@ -31,7 +31,10 @@
       "description": "entity_id основной сущности, к которой относится событие (MUST)."
     },
     "actor_entity_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "entity_id того, кто/что совершил действие (MUST, nullable для системных событий без актора-человека/сервиса)."
     },
     "actor_authority_scope": {
@@ -49,7 +52,10 @@
       "default": []
     },
     "payload": {
-      "type": ["object", "null"],
+      "type": [
+        "object",
+        "null"
+      ],
       "description": "Нечувствительные данные события (MAY). Персональные данные и коммерческие секреты в payload не помещаются — для них используется payload_commitment/evidence_refs с off-ledger хранением."
     },
     "payload_commitment": {
@@ -69,27 +75,42 @@
     "parent_event_ids": {
       "type": "array",
       "description": "Причинные ссылки: родительские события (MAY).",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "default": []
     },
     "depends_on_event_ids": {
       "type": "array",
       "description": "Причинные ссылки: события, от которых зависит текущее (MAY).",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "default": []
     },
     "caused_by_event_ids": {
       "type": "array",
       "description": "Причинные ссылки: события, вызвавшие текущее (MAY).",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "default": []
     },
     "supersedes_event_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Событие, которое заменяется текущим (используется для неразрушающей коррекции истории)."
     },
     "invalidates_event_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Событие, которое аннулируется текущим (append-only: аннулирование — это новое событие, старое не удаляется)."
     },
     "event_time": {
@@ -154,7 +175,14 @@
     },
     "proof_level": {
       "type": "string",
-      "enum": ["PL-0", "PL-1", "PL-2", "PL-3", "PL-4", "PL-5"],
+      "enum": [
+        "PL-0",
+        "PL-1",
+        "PL-2",
+        "PL-3",
+        "PL-4",
+        "PL-5"
+      ],
       "description": "Уровень доказательности конкретного события (раздел 17 протокольного ТЗ). Относится к событию, а не к репутации субъекта."
     }
   },
@@ -167,9 +195,6 @@
     "actor_entity_id",
     "actor_authority_scope",
     "event_time",
-    "received_time",
-    "committed_time",
-    "stream_sequence",
     "idempotency_key",
     "schema_version",
     "crypto_suite"

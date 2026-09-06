@@ -96,13 +96,21 @@ def verify_examples_against_schemas() -> bool:
             store[schema_id] = schema
 
     plan = [
-        ("event-generic.json", "event.schema.json"),
-        ("event-manufacturing.json", "profile-manufacturing.schema.json"),
+        (EXAMPLES_DIR / "event-generic.json", "event.schema.json"),
+        (EXAMPLES_DIR / "event-manufacturing.json", "profile-manufacturing.schema.json"),
     ]
 
+    # Записи публичного реестра проверяются по ЯДРУ: у них нет серверных полей
+    # (received_time, committed_time, stream_sequence), потому что они ещё не
+    # приняты в журнал. Именно на этом различии и держится разделение схем
+    # event.schema.json и event-committed.schema.json.
+    registry_dir = REPO_ROOT / "registry"
+    if registry_dir.is_dir():
+        plan += [(f, "event.schema.json") for f in sorted(registry_dir.glob("*.json"))]
+
     ok = True
-    for example_name, schema_name in plan:
-        example_path = EXAMPLES_DIR / example_name
+    for example_path, schema_name in plan:
+        example_name = example_path.name
         with open(example_path, "r", encoding="utf-8") as f:
             instance = json.load(f)
 
