@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyrqode.dev/schemas/v0.1/profile-product.schema.json",
+  "title": "Потребительский профиль: паспорт партии продукта",
+  "description": "Профиль поверх ядра события для того, что видит покупатель, отсканировав марку на упаковке. Марка идентифицирует ПАРТИЮ, а не продукт вообще: срок годности и дата производства принадлежат партии, поэтому и показывать их можно только через неё. Производитель, состав и характеристики подтягиваются связями от партии к продукту. Ответственность за достоверность несёт тот, кто заявил данные: журнал фиксирует, кто и когда это сделал, но не проверяет содержание за производителя.",
+  "allOf": [
+    { "$ref": "https://cyrqode.dev/schemas/v0.1/event.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "product_passport": {
+          "type": "object",
+          "description": "Сведения, которые производитель раскрывает покупателю.",
+          "required": ["product_name", "producer", "batch"],
+          "properties": {
+            "product_name": { "type": "string", "minLength": 1 },
+            "producer": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "identifier": { "type": "string", "description": "БИН, ИНН или иной идентификатор в своей юрисдикции" },
+                "country": { "type": "string" },
+                "site": { "type": "string", "description": "Площадка или цех выпуска" }
+              }
+            },
+            "description": { "type": "string" },
+            "batch": {
+              "type": "object",
+              "required": ["code", "produced_at"],
+              "properties": {
+                "code": { "type": "string", "description": "Номер партии у производителя" },
+                "produced_at": { "type": "string", "description": "Дата и время выпуска (RFC3339)" },
+                "best_before": { "type": "string", "description": "Годен до (RFC3339)" },
+                "storage": { "type": "string", "description": "Условия хранения" }
+              }
+            },
+            "attributes": {
+              "type": "object",
+              "description": "Характеристики продукта: жирность, объём, вес и прочее. Свободный набор пар, потому что у молока, стали и лекарства он разный.",
+              "additionalProperties": { "type": ["string", "number"] }
+            },
+            "composition": {
+              "type": "array",
+              "description": "Состав в порядке убывания массовой доли, как того требуют правила маркировки.",
+              "items": { "type": "string" }
+            },
+            "nutrition": {
+              "type": "object",
+              "description": "Пищевая ценность на 100 г или 100 мл.",
+              "additionalProperties": { "type": ["string", "number"] }
+            },
+            "certificates": {
+              "type": "array",
+              "description": "Декларации и сертификаты: номер и ссылка либо отпечаток документа.",
+              "items": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "number": { "type": "string" },
+                  "commitment": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["product_passport"]
+    }
+  ],
+  "unevaluatedProperties": false
+}

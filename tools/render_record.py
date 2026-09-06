@@ -13,6 +13,23 @@ import html
 import json
 import pathlib
 
+FRESHNESS_JS = """
+<script>
+/* Единственный скрипт на странице: сравнить срок годности с датой устройства.
+   Без него пришлось бы либо промолчать о свежести, либо утверждать её, не зная
+   сегодняшнего числа. */
+(function () {
+  var el = document.getElementById("freshness");
+  if (!el) return;
+  var best = new Date(el.getAttribute("data-best"));
+  if (isNaN(best)) return;
+  var expired = best < new Date();
+  el.className = "fresh " + (expired ? "bad" : "ok");
+  el.textContent = (expired ? "Срок истёк " : "Годен до ") + best.toLocaleDateString();
+})();
+</script>
+"""
+
 CSS = """
 :root { --ink:#04101F; --accent:#4800FF; --muted:#5a6472; --line:#e3e6ec; --bg:#ffffff; }
 @media (prefers-color-scheme: dark) {
@@ -40,12 +57,76 @@ code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; 
 .note { color:var(--muted); font-size:14px; }
 a { color:var(--accent); }
 footer { margin-top:32px; color:var(--muted); font-size:13px; }
+.hero { font-size:15px; }
+.big { font-size:20px; font-weight:600; margin:2px 0 0; }
+.rows { display:grid; grid-template-columns:minmax(140px,auto) 1fr; gap:8px 16px; }
+.rows div:nth-child(odd) { color:var(--muted); }
+ul.comp { margin:0; padding-left:20px; }
+.fresh { display:inline-block; padding:6px 12px; border-radius:10px; font-weight:600; }
+.fresh.ok { background:#e7f7ec; color:#0d6b2f; }
+.fresh.bad { background:#fdeaea; color:#8f1d1d; }
+@media (prefers-color-scheme: dark) {
+  .fresh.ok { background:#123021; color:#7fe0a3; }
+  .fresh.bad { background:#3a1717; color:#ff9a9a; }
+}
+.warn { border-left:3px solid var(--accent); padding-left:12px; }
+"""
+
+
+def _passport_html(pp: dict, e) -> str:
+    """Паспорт партии — то, ради чего покупатель вообще сканирует марку."""
+    if not pp:
+        return ""
+    prod = pp.get("producer", {}) or {}
+    batch = pp.get("batch", {}) or {}
+    attrs = pp.get("attributes", {}) or {}
+    comp = pp.get("composition", []) or []
+    nutr = pp.get("nutrition", {}) or {}
+    certs = pp.get("certificates", []) or []
+
+    rows = "".join(f"<div>{e(k)}</div><div>{e(str(v))}</div>" for k, v in attrs.items())
+    nutr_rows = "".join(f"<div>{e(k)}</div><div>{e(str(v))}</div>" for k, v in nutr.items())
+    comp_html = "".join(f"<li>{e(c)}</li>" for c in comp)
+    cert_html = "".join(
+        f'<div class="doc"><b>{e(c.get("name",""))}</b><span class="hash">'
+        f'{e(c.get("number",""))}{" · " + e(c.get("commitment","")) if c.get("commitment") else ""}'
+        f"</span></div>" for c in certs)
+
+    best = batch.get("best_before", "")
+    fresh = (f'<p><span class="fresh" id="freshness" data-best="{e(best)}">Годен до '
+             f'{e(best[:10])}</span></p>') if best else ""
+
+    return f"""
+<div class="card hero">
+  <h2>Продукт</h2>
+  <p class="big">{e(pp.get('product_name',''))}</p>
+  <p class="sub" style="margin:6px 0 0">{e(prod.get('name',''))}{
+      ', ' + e(prod.get('country','')) if prod.get('country') else ''}</p>
+  {'<p>' + e(pp.get('description','')) + '</p>' if pp.get('description') else ''}
+  {fresh}
+</div>
+
+<div class="card"><h2>Партия</h2><div class="rows">
+  <div>Номер партии</div><div>{e(batch.get('code',''))}</div>
+  <div>Выпущена</div><div>{e(batch.get('produced_at','')[:16].replace('T',' '))}</div>
+  {'<div>Годен до</div><div>' + e(batch.get('best_before','')[:16].replace('T',' ')) + '</div>' if best else ''}
+  {'<div>Хранение</div><div>' + e(batch.get('storage','')) + '</div>' if batch.get('storage') else ''}
+  {'<div>Площадка</div><div>' + e(prod.get('site','')) + '</div>' if prod.get('site') else ''}
+  {'<div>Идентификатор</div><div><code>' + e(prod.get('identifier','')) + '</code></div>' if prod.get('identifier') else ''}
+</div></div>
+
+{'<div class="card"><h2>Характеристики</h2><div class="rows">' + rows + '</div></div>' if rows else ''}
+{'<div class="card"><h2>Состав</h2><ul class="comp">' + comp_html + '</ul></div>' if comp_html else ''}
+{'<div class="card"><h2>Пищевая ценность на 100 мл</h2><div class="rows">' + nutr_rows + '</div></div>' if nutr_rows else ''}
+{'<div class="card"><h2>Документы</h2>' + cert_html + '</div>' if cert_html else ''}
 """
 
 
 def render(record: dict, json_url: str) -> str:
     p = record.get("payload", {})
     e = html.escape
+    passport = _passport_html(record.get("product_passport"), e)
+    freshness_script = FRESHNESS_JS if record.get("product_passport") else ""
     docs = ""
     for d in p.get("documents", []):
         docs += (f'<div class="doc"><b>{e(d.get("name",""))}</b>'
@@ -63,7 +144,8 @@ def render(record: dict, json_url: str) -> str:
 <p class="sub">{e(p.get('date',''))} · {e(p.get('author',''))}{
     ' · ' + e(p.get('author_role','')) if p.get('author_role') else ''}</p>
 
-<div class="card"><h2>What happened</h2><p>{e(p.get('summary',''))}</p></div>
+{passport}
+{'<div class="card"><h2>What happened</h2><p>' + e(p.get('summary','')) + '</p></div>' if p.get('summary') else ''}
 
 {'<div class="card"><h2>Naming</h2><dl>' + naming + '</dl></div>' if naming else ''}
 
@@ -87,7 +169,8 @@ def render(record: dict, json_url: str) -> str:
 <p>Proof level {e(record.get('proof_level','PL-0'))}: an owner statement. Signatures and
 independent witnessing are a later layer, and this page does not pretend otherwise.</p>
 </footer>
-</div></body></html>
+</div>{freshness_script}
+</body></html>
 """
 
 
