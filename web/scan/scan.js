@@ -98,7 +98,7 @@
         showScreen("camera");
         state.consecutiveCrcFail = 0;
         state.locked = false;
-        setCameraStatus("Наведите марку в прицел");
+        setCameraStatus("Наведите CYRQODE в прицел");
         els.video.play().catch(function () {});
         els.video.onloadedmetadata = function () {
           startScanLoop();
@@ -206,7 +206,7 @@
   function handleFrameResult(result) {
     if (!result.ok) {
       state.consecutiveCrcFail = 0;
-      setCameraStatus("Наведите марку в прицел");
+      setCameraStatus("Наведите CYRQODE в прицел");
       return;
     }
     if (result.payload.integrity_ok) {
@@ -264,7 +264,7 @@
       if (!result.ok) {
         showResultError(
           "Не удалось найти ядро метки на фото (" + result.reason + "). " +
-          "Убедитесь, что вся марка целиком попадает в кадр и хорошо освещена."
+          "Убедитесь, что CYRQODE целиком попадает в кадр и хорошо освещена."
         );
         return;
       }
@@ -319,7 +319,7 @@
   function showResultSuccess(payload) {
     els.resultIcon.className = "status-icon ok";
     els.resultIcon.textContent = "✓";
-    els.resultTitle.textContent = "Марка распознана";
+    els.resultTitle.textContent = "CYRQODE распознан";
     els.resultText.textContent =
       "Контрольная сумма (CRC-16) сошлась. Идентификатор распознан; " +
       "запись в реестре может отсутствовать — это не проверялось.";
@@ -330,18 +330,19 @@
       ["Type hint", payload.type_hint],
     ]);
     clearResultActions();
-    addAction("Открыть запись", GITHUB_REGISTRY_BASE + payload.entity_id + ".json", true);
+    addAction("Открыть запись", registryUrlFor(payload), true);
+    addAction("Сырые данные (JSON)", rawRecordUrlFor(payload), false);
     showScreen("result");
   }
 
   function showResultPartial() {
     els.resultIcon.className = "status-icon warn";
     els.resultIcon.textContent = "!";
-    els.resultTitle.textContent = "Марка распознана частично";
+    els.resultTitle.textContent = "CYRQODE распознан частично";
     els.resultText.textContent =
-      "Контрольная сумма не сошлась. Возможные причины: марка не полностью " +
+      "Контрольная сумма не сошлась. Возможные причины: CYRQODE не полностью " +
       "в прицеле, блики, недостаточный контраст печати или движение камеры. " +
-      "Наведите марку точнее и попробуйте снова.";
+      "Наведите CYRQODE точнее и попробуйте снова.";
     setResultField(els.resultFields, []);
     clearResultActions();
     showScreen("result");
