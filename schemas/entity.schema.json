@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://circlemark.dev/schemas/v0.1/entity.schema.json",
+  "$id": "https://cyrqode.dev/schemas/v0.1/entity.schema.json",
   "title": "Circle Mark Entity",
-  "description": "Каноническая сущность BUIP/Circle Mark. Источник полей: BizDNAi_BUIP_CircleMark_Technical_Specification_v0.1, раздел 6.1 (Entity). Схема нейтральна к отрасли: любой домен (производство, банк, логистика, документы, AI-агент) описывается одной и той же структурой сущности, а специфика домена выражается через entity_type и attributes, а не через новые обязательные поля.",
+  "description": "Каноническая сущность BUIP. Источник полей: спецификация BUIP v0.1, раздел 6.1 (Entity). Схема нейтральна к отрасли: любой домен (производство, банк, логистика, документы, AI-агент) описывается одной и той же структурой сущности, а специфика домена выражается через entity_type и attributes, а не через новые обязательные поля.",
   "type": "object",
   "properties": {
     "entity_id": {

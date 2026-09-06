@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://circlemark.dev/schemas/v0.1/relationship.schema.json",
+  "$id": "https://cyrqode.dev/schemas/v0.1/relationship.schema.json",
   "title": "Circle Mark Relationship",
-  "description": "Связь между двумя сущностями BUIP/Circle Mark. Источники полей: BizDNAi_BUIP_CircleMark_Technical_Specification_v0.1 раздел 6.2 (Relationship MUST быть first-class entity/event-derived object: тип, source, target, validity interval, authority/evidence, история) и manufacturing_buip_circle_mark_integration_ru.md раздел 5 (обязательные типы связей и производственная генеалогия). Схема единая — типы связей объединены из обоих источников без отдельного производственного профиля, т.к. relationship остаётся одной универсальной структурой независимо от домена.",
+  "description": "Связь между двумя сущностями BUIP. Источники полей: спецификация BUIP v0.1 раздел 6.2 (Relationship MUST быть first-class entity/event-derived object: тип, source, target, validity interval, authority/evidence, история) и производственный профиль BUIP раздел 5 (обязательные типы связей и производственная генеалогия). Схема единая — типы связей объединены из обоих источников без отдельного производственного профиля, т.к. relationship остаётся одной универсальной структурой независимо от домена.",
   "type": "object",
   "properties": {
     "relationship_id": {

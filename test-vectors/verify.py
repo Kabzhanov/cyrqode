@@ -33,7 +33,7 @@ VECTORS_FILE = Path(__file__).resolve().parent / "canonicalization.json"
 
 sys.path.insert(0, str(SDK_PATH))
 
-from circlemark_canonical import canonicalize, digest  # noqa: E402
+from buip_canonical import canonicalize, digest  # noqa: E402
 
 
 def verify_canonicalization() -> bool:

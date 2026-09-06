@@ -1,5 +1,5 @@
 {
-  "$comment": "Тестовые векторы канонизации Circle Mark (RFC 8785 / JCS). Значения canonical и sha256 вычислены референсной реализацией sdk/python/circlemark_canonical.py и сходятся при повторном запуске test-vectors/verify.py. Формат: см. test-vectors/README.md.",
+  "$comment": "Тестовые векторы канонизации BUIP (RFC 8785 / JCS). Значения canonical и sha256 вычислены референсной реализацией sdk/python/buip_canonical.py и сходятся при повторном запуске test-vectors/verify.py. Формат: см. test-vectors/README.md.",
   "algorithm": "RFC 8785 JSON Canonicalization Scheme (JCS)",
   "hash": "SHA-256",
   "cases": [
