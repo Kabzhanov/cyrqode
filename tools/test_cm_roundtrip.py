@@ -196,6 +196,47 @@ class RenderTests(unittest.TestCase):
         self.assertEqual(dom.documentElement.tagName, "svg")
         self.assertIn("#4800FF", svg)
 
+    def test_border_ring_geometry_within_required_ranges(self):
+        """Задача владельца: рамка r в 470-478, толщина 5-7, зазор до
+        Parity-кольца >=40, зазор до края канвы >=15."""
+        from cm_render import BORDER_IN_R, BORDER_OUT_R, BORDER_THICKNESS, PARITY_OUT_R, QUIET_ZONE_OUT_R
+        self.assertGreaterEqual(BORDER_IN_R, 470)
+        self.assertLessEqual(BORDER_OUT_R, 478)
+        self.assertGreaterEqual(BORDER_THICKNESS, 5)
+        self.assertLessEqual(BORDER_THICKNESS, 7)
+        self.assertGreaterEqual(BORDER_IN_R - PARITY_OUT_R, 40)
+        self.assertGreaterEqual(QUIET_ZONE_OUT_R - BORDER_OUT_R, 15)
+
+    def test_svg_with_center_logo_is_valid_and_embeds_data_uri(self):
+        logo_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..", "assets", "bizdnai-logo.png"
+        )
+        if not os.path.exists(logo_path):
+            self.skipTest(f"логотип не найден: {logo_path}")
+
+        bits = encode_payload(ENTITY_IDS[0], type_hint="document")
+        sectors = to_sectors(bits, DEFAULT_PROFILE)
+        svg = render_svg(sectors, profile=DEFAULT_PROFILE, center_logo_path=logo_path)
+
+        dom = minidom.parseString(svg)
+        self.assertEqual(dom.documentElement.tagName, "svg")
+
+        images = dom.getElementsByTagName("image")
+        self.assertEqual(len(images), 1)
+        href = images[0].getAttribute("href")
+        self.assertTrue(href.startswith("data:image/png;base64,"),
+                         "логотип обязан быть встроен как data URI, без внешних ссылок")
+        self.assertEqual(images[0].getAttribute("xlink:href"), href)
+
+        # логотип заменяет точку CORE_DOT_R, а не накладывается поверх неё
+        no_logo_svg = render_svg(sectors, profile=DEFAULT_PROFILE)
+        self.assertEqual(len(minidom.parseString(no_logo_svg).getElementsByTagName("image")), 0)
+
+    def test_center_logo_defaults_to_disabled(self):
+        import inspect
+        sig = inspect.signature(render_svg)
+        self.assertIsNone(sig.parameters["center_logo_path"].default)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

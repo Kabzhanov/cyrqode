@@ -1,7 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>BizDNAi Circle Mark — 0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70</title>
 <desc>BizDNAi Circle Mark — draft v0.1 (engineering prototype, encoding profile cm-v0.1-draft-a). Geometry is provisional, not a final print/engraving standard.</desc>
 <rect x="0" y="0" width="1000" height="1000" fill="#FFFFFF"/>
+<g id="cm-border-ring">
+<circle cx="500.000" cy="500.000" r="474.000" fill="none" stroke="#04101F" stroke-width="6.000"/>
+</g>
 <g id="cm-parity-ring">
 <path d="M 506.597,80.052 A 420.000,420.000 0 0 1 575.458,86.834 L 570.068,116.346 A 390.000,390.000 0 0 0 506.126,110.048 Z" fill="#04101F"/>
 <path d="M 585.241,104.072 A 405.000,405.000 0 0 1 649.090,123.441 L 643.569,137.387 A 390.000,390.000 0 0 0 582.084,118.736 Z" fill="#04101F"/>

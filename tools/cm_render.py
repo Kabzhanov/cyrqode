@@ -22,6 +22,7 @@ CM Core, который не несёт уникальный Entity ID (§10).
 from __future__ import annotations
 
 import argparse
+import base64
 import math
 import os
 import sys
@@ -59,6 +60,13 @@ CORE_DOT_R = 65
 CORE_WHITE_R = 130
 CORE_OUT_R = 176
 
+# ПРОЕКТНО: опциональный центральный логотип (--center-logo, по умолчанию
+# выключен) вписывается в белое кольцо-вырез CORE_WHITE_R с небольшим
+# внутренним отступом, чтобы не касаться цветного кольца ядра. Отступ 3
+# единицы — середина требуемого диапазона 2-4.
+LOGO_INSET = 3
+LOGO_R = CORE_WHITE_R - LOGO_INSET  # 127
+
 SYNC_GAP = 14          # зазор между Core и Sync/Orientation кольцом
 SYNC_IN_R = CORE_OUT_R + SYNC_GAP          # 190
 SYNC_THICKNESS = 44
@@ -93,11 +101,25 @@ DATA_RING_RADII = [
 ]
 
 # Quiet zone (§7 "фиксированные... нормативные quiet/separation zones"):
-# всё, что снаружи PARITY_OUT_R, остаётся пустым до края канвы. При
-# PARITY_OUT_R=420 и CANVAS=1000 метка (без учёта quiet zone) занимает
-# 2*420/1000 = 84% кадра — попадает в требуемый диапазон 80-85% (§20
-# визуальной спецификации).
+# край канвы.
 QUIET_ZONE_OUT_R = CANVAS / 2  # 500, край канвы
+
+# ПРОЕКТНО: внешнее замкнутое кольцо-рамка, обозначающее физический край
+# метки — опорная граница для оценки масштаба/полноты кадра при детекции
+# (не несёт бит payload, чисто геометрический ориентир). Требования:
+# радиус кольца в диапазоне 470-478, толщина 5-7, зазор до Parity-кольца
+# не менее 40, зазор до края канвы не менее 15 — выбраны конкретные числа
+# с запасом от обоих порогов:
+BORDER_GAP = 51             # зазор Parity(420) -> рамка: 51 >= 40 (запас)
+BORDER_IN_R = PARITY_OUT_R + BORDER_GAP        # 471
+BORDER_THICKNESS = 6                            # в диапазоне 5-7
+BORDER_OUT_R = BORDER_IN_R + BORDER_THICKNESS  # 477 (диапазон 470-478 выдержан)
+BORDER_MARGIN = QUIET_ZONE_OUT_R - BORDER_OUT_R  # зазор рамка -> край канвы: 23 >= 15
+
+# При PARITY_OUT_R=420 и CANVAS=1000 кодовая область (без рамки/quiet zone)
+# по-прежнему занимает 2*420/1000 = 84% кадра — попадает в требуемый
+# диапазон 80-85% (§20 визуальной спецификации); рамка и внешний отступ
+# лежат уже в исходной "пустой" зоне снаружи Parity-кольца.
 
 SECTOR_GAP_FRACTION = 0.16  # доля углового шага сектора, оставляемая пустой
                              # между соседними секторами (separation zone)
@@ -193,12 +215,74 @@ def _render_orientation_ring(cx, cy, r_in, r_out, ink: str) -> str:
     return "\n".join(parts)
 
 
-def _render_core(cx, cy, ink: str, core_color: str) -> str:
+def _render_border_ring(cx, cy, ink: str) -> str:
+    """Внешнее замкнутое кольцо-рамка (не sector-based — сплошная
+    окружность), обозначающее физический край метки. Того же цвета, что и
+    краска метки (ink), не цветное — рамка не несёт данных."""
+    r_mid = (BORDER_IN_R + BORDER_OUT_R) / 2
     return (
-        f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(CORE_OUT_R)}" fill="{core_color}"/>\n'
-        f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(CORE_WHITE_R)}" fill="#FFFFFF"/>\n'
-        f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(CORE_DOT_R)}" fill="{core_color}"/>'
+        f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(r_mid)}" '
+        f'fill="none" stroke="{ink}" stroke-width="{_fmt(BORDER_THICKNESS)}"/>'
     )
+
+
+_LOGO_MIME_BY_EXT = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+}
+
+
+def _load_logo_data_uri(path: str) -> str:
+    """Читает файл логотипа и возвращает data: URI (base64), чтобы SVG
+    остался самодостаточным (без внешних ссылок на файлы, §20 "Renderer...
+    без внешних зависимостей")."""
+    ext = os.path.splitext(path)[1].lower()
+    mime = _LOGO_MIME_BY_EXT.get(ext)
+    if mime is None:
+        raise ValueError(
+            f"неподдерживаемый формат логотипа {ext!r}; ожидается один из "
+            f"{sorted(_LOGO_MIME_BY_EXT)}"
+        )
+    with open(path, "rb") as f:
+        raw = f.read()
+    b64 = base64.b64encode(raw).decode("ascii")
+    return f"data:{mime};base64,{b64}"
+
+
+def _render_core(cx, cy, ink: str, core_color: str, logo_data_uri: str | None = None) -> str:
+    """CM Core: закрашенный диск + белое кольцо-вырез, всегда видимые (ядро
+    остаётся опорной точкой для поиска центра при любом варианте, §10).
+
+    Центральная часть — либо закрашенная точка CORE_DOT_R (по умолчанию),
+    либо, если передан logo_data_uri, PNG/JPEG/SVG логотип, вписанный в
+    круг радиусом LOGO_R (<CORE_WHITE_R, с отступом LOGO_INSET) через
+    <image> с круглым clip-path — логотип заменяет точку, а не
+    накладывается поверх неё.
+    """
+    base = (
+        f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(CORE_OUT_R)}" fill="{core_color}"/>\n'
+        f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(CORE_WHITE_R)}" fill="#FFFFFF"/>'
+    )
+    if logo_data_uri is None:
+        center = f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(CORE_DOT_R)}" fill="{core_color}"/>'
+        return base + "\n" + center
+
+    clip_id = "cm-core-logo-clip"
+    x = cx - LOGO_R
+    y = cy - LOGO_R
+    size = 2 * LOGO_R
+    center = (
+        f'<defs><clipPath id="{clip_id}">'
+        f'<circle cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{_fmt(LOGO_R)}"/>'
+        f'</clipPath></defs>\n'
+        f'<image x="{_fmt(x)}" y="{_fmt(y)}" width="{_fmt(size)}" height="{_fmt(size)}" '
+        f'href="{logo_data_uri}" xlink:href="{logo_data_uri}" '
+        f'clip-path="url(#{clip_id})" preserveAspectRatio="xMidYMid slice"/>'
+    )
+    return base + "\n" + center
 
 
 def render_svg(
@@ -209,17 +293,24 @@ def render_svg(
     background: str = "#FFFFFF",
     accent_core: bool = False,
     accent_color: str = "#4800FF",
+    center_logo_path: str | None = None,
     title: str = "BizDNAi Circle Mark",
 ) -> str:
     """Рендерит sectors (см. cm_encoder.to_sectors) в самодостаточный SVG.
 
     Монохромный профиль обязателен для ВСЕХ элементов, несущих информацию
-    (Sync/Orientation, Data rings, Parity ring) — цвет для них не
-    параметризуется намеренно, чтобы decoder мог полагаться только на
-    геометрию/контраст (§8 "Decoder MUST определять состояние по геометрии
-    и контрасту, а не по цвету"). Фирменный цвет (accent_core) допускается
-    ТОЛЬКО для CM Core, который одинаков для всех меток и не несёт Entity
-    ID (§10) — это "non-essential layer, не меняющий decode" (§20).
+    (Sync/Orientation, Data rings, Parity ring, внешняя рамка) — цвет для
+    них не параметризуется намеренно, чтобы decoder мог полагаться только
+    на геометрию/контраст (§8 "Decoder MUST определять состояние по
+    геометрии и контрасту, а не по цвету"). Фирменный цвет (accent_core)
+    допускается ТОЛЬКО для CM Core, который одинаков для всех меток и не
+    несёт Entity ID (§10) — это "non-essential layer, не меняющий decode"
+    (§20).
+
+    center_logo_path (опционально, по умолчанию None/выключено): путь к
+    PNG/JPEG/SVG/WebP-логотипу, встраиваемому как data: URI в белое
+    кольцо-вырез CM Core (заменяет собой центральную точку). См.
+    предупреждения об ограничениях логотипа в README.
     """
     cx = cy = CENTER
     core_color = accent_color if accent_core else ink
@@ -231,14 +322,20 @@ def render_svg(
 
     parity_svg = _render_data_ring(cx, cy, PARITY_IN_R, PARITY_OUT_R, sectors["parity"], ink)
     sync_svg = _render_orientation_ring(cx, cy, SYNC_IN_R, SYNC_OUT_R, ink)
-    core_svg = _render_core(cx, cy, ink, core_color)
+    border_svg = _render_border_ring(cx, cy, ink)
+
+    logo_data_uri = _load_logo_data_uri(center_logo_path) if center_logo_path else None
+    core_svg = _render_core(cx, cy, ink, core_color, logo_data_uri=logo_data_uri)
 
     safe_title = saxutils.escape(title)
 
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {CANVAS} {CANVAS}" width="{CANVAS}" height="{CANVAS}">
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {CANVAS} {CANVAS}" width="{CANVAS}" height="{CANVAS}">
 <title>{safe_title}</title>
 <desc>BizDNAi Circle Mark — draft v0.1 (engineering prototype, encoding profile cm-v0.1-draft-a). Geometry is provisional, not a final print/engraving standard.</desc>
 <rect x="0" y="0" width="{CANVAS}" height="{CANVAS}" fill="{background}"/>
+<g id="cm-border-ring">
+{border_svg}
+</g>
 <g id="cm-parity-ring">
 {parity_svg}
 </g>
@@ -282,6 +379,10 @@ def _build_arg_parser() -> argparse.ArgumentParser:
                          "(не меняет data/orientation/parity кольца — они всегда монохромны)")
     p.add_argument("--ink", default="#04101F", help="основной цвет data-элементов")
     p.add_argument("--background", default="#FFFFFF")
+    p.add_argument("--center-logo", default=None, metavar="PATH",
+                    help="по умолчанию ВЫКЛЮЧЕНО: путь к PNG/JPEG/SVG/WebP-логотипу, "
+                         "встраиваемому как data: URI в белое кольцо CM Core вместо точки. "
+                         "Не рекомендуется для гравировки и меток мельче 20 мм — см. README.")
     return p
 
 
@@ -303,6 +404,7 @@ def main(argv=None) -> int:
         ink=args.ink,
         background=args.background,
         accent_core=args.accent_core,
+        center_logo_path=args.center_logo,
         title=f"BizDNAi Circle Mark — {args.entity_id}",
     )
 
