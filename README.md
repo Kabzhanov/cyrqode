@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/cyrqode-symbol.png" alt="CYRQODE" width="132">
+</p>
+
 # CYRQODE™
 
 Технология доказуемой идентичности: универсальный идентификатор сущностей и
