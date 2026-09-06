@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>cm-scan — самопроверка декодера</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; color: #0b0e14; }
+  h1 { font-size: 20px; }
+  .case { border: 1px solid #ddd; border-radius: 10px; padding: 14px 16px; margin: 16px 0; }
+  .case.pass { border-color: #1c7a3f; background: #f2faf5; }
+  .case.fail { border-color: #b3261e; background: #fdf3f2; }
+  .case h2 { font-size: 15px; margin: 0 0 8px; }
+  canvas { border: 1px solid #ccc; max-width: 220px; height: auto; vertical-align: top; margin-right: 14px; }
+  table { border-collapse: collapse; font-size: 13px; }
+  td { padding: 2px 8px 2px 0; vertical-align: top; }
+  td.k { color: #666; white-space: nowrap; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+  #summary { font-size: 16px; font-weight: 700; padding: 12px 16px; border-radius: 10px; margin: 20px 0; }
+  #summary.pass { background: #e7f6ec; color: #1c7a3f; }
+  #summary.fail { background: #fbe9e7; color: #b3261e; }
+  code { background: #f0f0f0; padding: 1px 5px; border-radius: 4px; }
+  .muted { color: #666; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>cm-scan — самопроверка декодера (без камеры)</h1>
+<p class="muted">
+  Рендерит эталонные SVG-марки (<code>fixtures/cyrqode-genesis-mark.svg</code> —
+  без логотипа, и <code>fixtures/cyrqode-genesis-mark-logo.svg</code> — с
+  логотипом в ядре) в canvas и прогоняет их через ТОТ ЖЕ декодер
+  (<code>cm-scan-core.js</code>), который использует живой сканер камеры
+  (<code>scan.js</code>). Не требует камеры/телефона — проверяет только
+  правильность геометрии/битовой раскладки/CRC и устойчивость поиска ядра
+  к произвольному содержимому центра (логотип).
+</p>
+
+<div id="cases"></div>
+<div id="summary">Проверка…</div>
+
+<script src="cm-scan-core.js"></script>
+<script>
+(function () {
+  "use strict";
+  var EXPECTED_ENTITY_ID = "0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70";
+
+  var FIXTURES = [
+    { path: "fixtures/cyrqode-genesis-mark.svg", label: "genesis mark — без логотипа (--center-logo выключен)" },
+    { path: "fixtures/cyrqode-genesis-mark-logo.svg", label: "genesis mark — с логотипом в ядре (--center-logo)" },
+  ];
+
+  var casesEl = document.getElementById("cases");
+  var summaryEl = document.getElementById("summary");
+  var results = [];
+
+  function renderCase(fx, outcome) {
+    var div = document.createElement("div");
+    div.className = "case " + (outcome.pass ? "pass" : "fail");
+    var rowsHtml = "";
+    function row(k, v) { rowsHtml += "<tr><td class='k'>" + k + "</td><td>" + v + "</td></tr>"; }
+    row("Файл", "<code>" + fx.path + "</code>");
+    row("Ожидаемый Entity ID", "<code>" + EXPECTED_ENTITY_ID + "</code>");
+    row("Распознанный Entity ID", "<code>" + (outcome.entity_id || "—") + "</code>");
+    row("Совпадение Entity ID", outcome.entityMatch ? "да" : "нет");
+    row("CRC (integrity_ok)", outcome.integrity_ok === true ? "сошлась" : (outcome.integrity_ok === false ? "НЕ сошлась" : "—"));
+    row("Namespace / Type hint", (outcome.namespace || "—") + " / " + (outcome.type_hint || "—"));
+    row("Найденный центр (cx, cy, s)", outcome.core ? (outcome.core.cx.toFixed(2) + ", " + outcome.core.cy.toFixed(2) + ", s=" + outcome.core.s.toFixed(4)) : "—");
+    row("Найденный поворот", outcome.rotation != null ? (outcome.rotation + "°") : "—");
+    row("Parity mismatches", outcome.parity_mismatches != null ? String(outcome.parity_mismatches) : "—");
+    row("Время decode", outcome.ms != null ? (outcome.ms + " мс") : "—");
+    if (outcome.error) row("Ошибка", "<span style='color:#b3261e'>" + outcome.error + "</span>");
+    div.innerHTML =
+      "<h2>" + (outcome.pass ? "✓ PASS — " : "✗ FAIL — ") + fx.label + "</h2>" +
+      "<div class='row'><div><canvas id='" + outcome.canvasId + "' width='300' height='300'></canvas></div>" +
+      "<table>" + rowsHtml + "</table></div>";
+    casesEl.appendChild(div);
+  }
+
+  function runFixture(fx, idx, done) {
+    var canvasId = "canvas-" + idx;
+    var img = new Image();
+    img.onload = function () {
+      var full = document.createElement("canvas");
+      full.width = 1000;
+      full.height = 1000;
+      var fctx = full.getContext("2d", { willReadFrequently: true });
+      fctx.drawImage(img, 0, 0, 1000, 1000);
+
+      var outcome = { canvasId: canvasId };
+      try {
+        var imageData = fctx.getImageData(0, 0, 1000, 1000);
+        var sampler = CMScanCore.makeSampler(imageData);
+        var t0 = performance.now();
+        // Эталонная марка отрендерена 1:1 (viewBox 1000x1000 -> canvas
+        // 1000x1000), поэтому номинальная догадка (центр канвы, s=1) точна
+        // "из коробки" — но поиск всё равно РЕАЛЬНЫЙ (findCore/findRotation
+        // из cm-scan-core.js), не подставлены готовые координаты.
+        var result = CMScanCore.attemptDecode(sampler, 500, 500, 1.0, {
+          core: { centerSearchPx: 60, scaleRange: [0.85, 1.2], nSamples: 24, gridN: 7 },
+        });
+        var t1 = performance.now();
+        outcome.ms = Math.round(t1 - t0);
+        if (!result.ok) {
+          outcome.pass = false;
+          outcome.error = "decode pipeline вернул ok=false, reason=" + result.reason;
+          outcome.core = result.core || null;
+        } else {
+          outcome.core = result.core;
+          outcome.rotation = result.rotation.delta;
+          outcome.entity_id = result.payload.entity_id;
+          outcome.integrity_ok = result.payload.integrity_ok;
+          outcome.namespace = result.payload.namespace;
+          outcome.type_hint = result.payload.type_hint;
+          outcome.parity_mismatches = result.payload.parity_mismatches.length;
+          outcome.entityMatch = result.payload.entity_id === EXPECTED_ENTITY_ID;
+          outcome.pass = outcome.entityMatch && result.payload.integrity_ok;
+        }
+      } catch (e) {
+        outcome.pass = false;
+        outcome.error = String(e);
+      }
+
+      renderCase(fx, outcome);
+      var previewCtx = document.getElementById(canvasId).getContext("2d");
+      previewCtx.drawImage(full, 0, 0, 300, 300);
+      results.push(outcome);
+      done();
+    };
+    img.onerror = function () {
+      var outcome = { canvasId: canvasId, pass: false, error: "не удалось загрузить " + fx.path };
+      renderCase(fx, outcome);
+      results.push(outcome);
+      done();
+    };
+    img.src = fx.path;
+  }
+
+  var i = 0;
+  function next() {
+    if (i >= FIXTURES.length) {
+      var allPass = results.every(function (r) { return r.pass; });
+      summaryEl.className = allPass ? "pass" : "fail";
+      summaryEl.textContent = allPass
+        ? "ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ (" + results.length + "/" + results.length + ") — декодер читает геометрию генератора корректно на обоих вариантах метки."
+        : "ЕСТЬ ОШИБКИ (" + results.filter(function (r) { return r.pass; }).length + "/" + results.length + " пройдено) — см. детали выше.";
+      return;
+    }
+    runFixture(FIXTURES[i], i, function () { i++; next(); });
+  }
+  next();
+})();
+</script>
+</body>
+</html>

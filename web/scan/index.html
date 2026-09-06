@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>CYRQODE Circle Mark — сканер (v0.1)</title>
+<meta name="description" content="Сканер физического знака Circle Mark (CYRQODE). Инженерный прототип v0.1." />
+<meta name="color-scheme" content="light dark" />
+<link rel="stylesheet" href="scan.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ==================== стартовый экран ==================== -->
+  <section id="screen-start" class="screen active">
+    <p class="brand-title">CYRQODE · Circle Mark</p>
+    <button id="btn-start-scan" class="scan-btn" type="button" aria-label="Сканировать">
+      <img src="assets/cyrqode-symbol.png" alt="" />
+    </button>
+    <div class="scan-btn-label">Сканировать</div>
+    <div class="file-fallback">
+      <button id="btn-pick-photo" class="secondary-link" type="button">Загрузить фото марки из файла</button>
+      <input id="file-input" type="file" accept="image/*" capture="environment" />
+    </div>
+  </section>
+
+  <!-- ==================== экран камеры ==================== -->
+  <section id="screen-camera" class="screen">
+    <video id="video" playsinline muted autoplay></video>
+    <canvas id="capture-canvas"></canvas>
+    <div class="camera-overlay">
+      <div class="crosshair" id="crosshair"></div>
+    </div>
+    <div class="camera-status" id="camera-status">Наведите марку в прицел</div>
+    <p class="footer-note">Версия 0.1. Наведите марку в прицел — автоматический поиск марки в кадре появится позже.</p>
+    <div class="camera-controls">
+      <button id="btn-camera-back" class="round-btn" type="button" aria-label="Назад">←</button>
+      <button id="btn-camera-file" class="pill-btn" type="button">Фото из файла</button>
+    </div>
+  </section>
+
+  <!-- ==================== экран "камера недоступна" ==================== -->
+  <section id="screen-error" class="screen">
+    <div class="status-icon warn">⚠</div>
+    <h1 class="result-title">Камера недоступна</h1>
+    <p class="result-text" id="error-text">
+      Не удалось получить доступ к камере в этом окне (частый случай — приложение
+      открыло ссылку во встроенном просмотрщике без разрешения на камеру).
+    </p>
+    <div class="btn-row">
+      <a id="btn-open-browser" class="primary-btn" href="#" target="_blank" rel="noopener">Открыть в браузере</a>
+      <button id="btn-error-file" class="ghost-btn" type="button">Загрузить фото из файла</button>
+    </div>
+    <button id="btn-error-back" class="secondary-link" type="button">Назад</button>
+  </section>
+
+  <!-- ==================== экран результата ==================== -->
+  <section id="screen-result" class="screen">
+    <div id="result-icon" class="status-icon info">?</div>
+    <h1 class="result-title" id="result-title">—</h1>
+    <p class="result-text" id="result-text"></p>
+    <div class="result-fields" id="result-fields" hidden></div>
+    <div class="btn-row" id="result-actions"></div>
+    <button id="btn-result-back" class="secondary-link" type="button">Сканировать ещё раз</button>
+  </section>
+
+  <p class="footer-note" id="global-footer">
+    Версия 0.1. Наведите марку в прицел — автоматический поиск марки в кадре появится позже.
+  </p>
+</div>
+
+<script src="cm-scan-core.js"></script>
+<script src="scan.js"></script>
+</body>
+</html>
