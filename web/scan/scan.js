@@ -325,6 +325,7 @@
       "запись в реестре может отсутствовать — это не проверялось.";
     setResultField(els.resultFields, [
       ["Entity ID", payload.entity_id],
+      ["Запись", registryUrlFor(payload)],
       ["Namespace", payload.namespace],
       ["Версия профиля", "CM v" + payload.version + " (профиль " + payload.profile_id + ")"],
       ["Type hint", payload.type_hint],
