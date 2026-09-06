@@ -1,0 +1,209 @@
+{
+  "$comment": "Тестовые векторы канонизации Circle Mark (RFC 8785 / JCS). Значения canonical и sha256 вычислены референсной реализацией sdk/python/circlemark_canonical.py и сходятся при повторном запуске test-vectors/verify.py. Формат: см. test-vectors/README.md.",
+  "algorithm": "RFC 8785 JSON Canonicalization Scheme (JCS)",
+  "hash": "SHA-256",
+  "cases": [
+    {
+      "name": "key_sorting_flat",
+      "description": "Плоский объект: ключи во входе не по алфавиту, канонизация сортирует их",
+      "input": {
+        "b": 2,
+        "a": 1,
+        "c": 3
+      },
+      "canonical": "{\"a\":1,\"b\":2,\"c\":3}",
+      "sha256": "e6a3385fb77c287a712e7f406a451727f0625041823ecf23bea7ef39b2e39805"
+    },
+    {
+      "name": "key_sorting_nested",
+      "description": "Вложенные объекты: сортировка ключей применяется независимо на каждом уровне",
+      "input": {
+        "z": {
+          "y": 1,
+          "x": 2
+        },
+        "a": {
+          "b": 2,
+          "a": 1
+        }
+      },
+      "canonical": "{\"a\":{\"a\":1,\"b\":2},\"z\":{\"x\":2,\"y\":1}}",
+      "sha256": "579adf8a7fd1ef6fa9fb5faad53536a08066387c49bffc09dfceed6fe4d646d9"
+    },
+    {
+      "name": "array_order_preserved",
+      "description": "Порядок элементов массива — часть данных и не переупорядочивается",
+      "input": {
+        "values": [
+          3,
+          1,
+          2
+        ],
+        "nested": [
+          {
+            "b": 1,
+            "a": 2
+          },
+          {
+            "d": 1,
+            "c": 2
+          }
+        ]
+      },
+      "canonical": "{\"nested\":[{\"a\":2,\"b\":1},{\"c\":2,\"d\":1}],\"values\":[3,1,2]}",
+      "sha256": "cebc580a689158270b357dd1e9a2046136700a50af8baedf6bb34167222cf54b"
+    },
+    {
+      "name": "unicode_cyrillic",
+      "description": "Кириллица и не-ASCII символы выводятся как есть (UTF-8), без \\u-экранирования",
+      "input": {
+        "название": "Циркуль Марк",
+        "город": "Алматы",
+        "emoji": "🔵"
+      },
+      "canonical": "{\"emoji\":\"🔵\",\"город\":\"Алматы\",\"название\":\"Циркуль Марк\"}",
+      "sha256": "48a325522252b40748c50066274f8f643c1fcaec60cc7df133b67ba97d9efe7a"
+    },
+    {
+      "name": "numbers_integers",
+      "description": "Целые числа: положительные, отрицательные, ноль",
+      "input": {
+        "positive": 42,
+        "negative": -17,
+        "zero": 0
+      },
+      "canonical": "{\"negative\":-17,\"positive\":42,\"zero\":0}",
+      "sha256": "9f29883067897e9374ecdbbe48f88dc32e8689860b20594c8a8a830fa9577219"
+    },
+    {
+      "name": "numbers_negative_zero",
+      "description": "Отрицательный ноль сериализуется как '0' (ECMAScript ToString(-0) == '0')",
+      "input": {
+        "neg_zero": -0.0,
+        "pos_zero": 0.0
+      },
+      "canonical": "{\"neg_zero\":0,\"pos_zero\":0}",
+      "sha256": "0c91a4eb864965dcc80f9f5dd1fd5844c36fef5b3fae19dcf8d2ebf9311eeea9"
+    },
+    {
+      "name": "numbers_fractions",
+      "description": "Дробные числа: обычная и экспоненциальная запись, отбрасывание незначащих нулей",
+      "input": {
+        "pi_approx": 3.14,
+        "small": 0.002,
+        "trailing_zero": 4.5,
+        "big_exp": 1e+30
+      },
+      "canonical": "{\"big_exp\":1e+30,\"pi_approx\":3.14,\"small\":0.002,\"trailing_zero\":4.5}",
+      "sha256": "ca4111eba885b479c5a06dbc4bb82440d111335d3e9b81995ccd73ce5608aee0"
+    },
+    {
+      "name": "numbers_large_and_small_exponent",
+      "description": "Переключение на экспоненциальную запись по порогам ECMAScript Number::toString",
+      "input": {
+        "just_below_threshold": 1e+20,
+        "at_threshold": 1e+21,
+        "small_decimal": 1e-06,
+        "small_exp": 1e-07
+      },
+      "canonical": "{\"at_threshold\":1e+21,\"just_below_threshold\":100000000000000000000,\"small_decimal\":0.000001,\"small_exp\":1e-7}",
+      "sha256": "aad246e44539fae8b0ffb134845e680dfb2e0ee38ffe3572828f42b608d98e00"
+    },
+    {
+      "name": "booleans_and_null",
+      "description": "Булевы значения и null сохраняются как есть, отсутствующее поле не подставляется",
+      "input": {
+        "is_active": true,
+        "is_deleted": false,
+        "deleted_at": null
+      },
+      "canonical": "{\"deleted_at\":null,\"is_active\":true,\"is_deleted\":false}",
+      "sha256": "b184330972601e9c727310c42726493740a756fc79474b5180c851f6df6555de"
+    },
+    {
+      "name": "empty_object",
+      "description": "Пустой объект",
+      "input": {},
+      "canonical": "{}",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "empty_array",
+      "description": "Пустой массив",
+      "input": [],
+      "canonical": "[]",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "empty_nested",
+      "description": "Пустые объект и массив как значения полей",
+      "input": {
+        "attributes": {},
+        "evidence_refs": []
+      },
+      "canonical": "{\"attributes\":{},\"evidence_refs\":[]}",
+      "sha256": "277f21f48a7628f93c28022241d7d529485a71e466a630bbbdfbf6cd21a2bb39"
+    },
+    {
+      "name": "string_escaping_quotes_and_newlines",
+      "description": "Экранирование кавычек, обратного слэша и управляющих символов; forward slash не экранируется",
+      "input": {
+        "comment": "Оператор сказал: \"партия №7\"\nследующая строка\tс табуляцией \\ и /слэшем/"
+      },
+      "canonical": "{\"comment\":\"Оператор сказал: \\\"партия №7\\\"\\nследующая строка\\tс табуляцией \\\\ и /слэшем/\"}",
+      "sha256": "09125fa0b240cf5d8f2ce0df879f4083a171ba1725e312a0e590d3f0285f50e5"
+    },
+    {
+      "name": "string_control_chars",
+      "description": "Управляющий символ вне списка коротких escape-последовательностей (здесь U+000B) кодируется как \\u00XX",
+      "input": {
+        "raw": "before\u000bafter"
+      },
+      "canonical": "{\"raw\":\"before\\u000bafter\"}",
+      "sha256": "254637f9efc56ebf75ea1503c29ae3683fa764bbe37468bfee89fd57a7dc523c"
+    },
+    {
+      "name": "mixed_realistic_event_fragment",
+      "description": "Комбинированный случай, близкий к фрагменту реального события: вложенность, unicode, числа, null, массивы",
+      "input": {
+        "event_type": "manufacturing.batch.produced.v1",
+        "subject_entity_id": "buip:mfg:batch:0001",
+        "actor_entity_id": null,
+        "quantity": 125.5,
+        "unit": "кг",
+        "related_entity_refs": [
+          "buip:mfg:order:42",
+          "buip:mfg:line:3"
+        ],
+        "attributes": {
+          "температура_c": 63.2,
+          "давление_bar": 1.0,
+          "проверено": true
+        }
+      },
+      "canonical": "{\"actor_entity_id\":null,\"attributes\":{\"давление_bar\":1,\"проверено\":true,\"температура_c\":63.2},\"event_type\":\"manufacturing.batch.produced.v1\",\"quantity\":125.5,\"related_entity_refs\":[\"buip:mfg:order:42\",\"buip:mfg:line:3\"],\"subject_entity_id\":\"buip:mfg:batch:0001\",\"unit\":\"кг\"}",
+      "sha256": "78df1c09f032291752e027ed28e0b5f225b3ca3dbd53182cfb7c7d2d48e106ba"
+    },
+    {
+      "name": "rfc8785_french_reference_vector",
+      "description": "Контрольный вектор из официального эталонного набора RFC 8785 / JCS (т.н. 'French' test vector) — сверка независимой реализации с публичным reference vector",
+      "input": {
+        "numbers": [
+          333333333.3333333,
+          1e+30,
+          4.5,
+          0.002,
+          1e-27
+        ],
+        "string": "€$\u000f\nA'B\"\\\\\"/",
+        "literals": [
+          null,
+          true,
+          false
+        ]
+      },
+      "canonical": "{\"literals\":[null,true,false],\"numbers\":[333333333.3333333,1e+30,4.5,0.002,1e-27],\"string\":\"€$\\u000f\\nA'B\\\"\\\\\\\\\\\"/\"}",
+      "sha256": "2d5e01a318d0f0879ab568c4be289c8b1f64ef8921a53c6277d5e069978baacb"
+    }
+  ]
+}

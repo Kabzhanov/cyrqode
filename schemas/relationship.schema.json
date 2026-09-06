@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://circlemark.dev/schemas/v0.1/relationship.schema.json",
+  "title": "Circle Mark Relationship",
+  "description": "Связь между двумя сущностями BUIP/Circle Mark. Источники полей: BizDNAi_BUIP_CircleMark_Technical_Specification_v0.1 раздел 6.2 (Relationship MUST быть first-class entity/event-derived object: тип, source, target, validity interval, authority/evidence, история) и manufacturing_buip_circle_mark_integration_ru.md раздел 5 (обязательные типы связей и производственная генеалогия). Схема единая — типы связей объединены из обоих источников без отдельного производственного профиля, т.к. relationship остаётся одной универсальной структурой независимо от домена.",
+  "type": "object",
+  "properties": {
+    "relationship_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Идентификатор связи как first-class объекта (не пары ссылок, а самостоятельной сущности со своей историей)."
+    },
+    "relationship_type": {
+      "type": "string",
+      "description": "Тип связи. Перечень объединяет раздел 6.2 протокольного ТЗ и раздел 5 производственного ТЗ.",
+      "enum": [
+        "part_of",
+        "contains",
+        "located_at",
+        "installed_in",
+        "produced_by",
+        "derived_from",
+        "operated_by",
+        "owned_by",
+        "certified_by",
+        "transported_by",
+        "depends_on",
+        "governed_by_tech_map",
+        "uses_recipe_revision",
+        "processed_by",
+        "consumed_in",
+        "transferred_by",
+        "inspected_by",
+        "supersedes",
+        "invalidates",
+        "corrects"
+      ]
+    },
+    "source_entity_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "entity_id источника связи."
+    },
+    "target_entity_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "entity_id цели связи."
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Начало интервала действия связи (validity interval)."
+    },
+    "valid_until": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Конец интервала действия связи. null или отсутствие поля означает, что связь действует по настоящий момент."
+    },
+    "authority_policy_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ссылка на authority, на основании которой связь установлена/подтверждена."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "Ссылки на evidence, подтверждающие связь (документы, наблюдения, сканы).",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "superseded", "invalidated", "corrected"],
+      "description": "Статус связи, event-derived: выводится из истории событий (создание/supersedes/invalidates/corrects), а не редактируется напрямую."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Момент создания записи о связи (event-derived)."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Версия схемы связи в формате семантического версионирования."
+    }
+  },
+  "required": [
+    "relationship_id",
+    "relationship_type",
+    "source_entity_id",
+    "target_entity_id",
+    "valid_from",
+    "authority_policy_id",
+    "status",
+    "created_at",
+    "schema_version"
+  ],
+  "additionalProperties": false
+}

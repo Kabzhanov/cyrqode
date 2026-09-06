@@ -1,0 +1,46 @@
+{
+  "event_id": "buip:evt:demo-dairy:0000000000981234",
+  "tenant_id": "buip:tenant:demo-dairy",
+  "namespace_id": "buip:ns:demo-dairy-mfg",
+  "event_type": "manufacturing.batch.produced.v1",
+  "subject_entity_id": "buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001",
+  "actor_entity_id": "buip:mfg:demo-dairy:terminal:line3-term-02",
+  "actor_authority_scope": "buip:policy:demo-dairy:operator-batch-release:v1",
+  "related_entity_refs": [
+    "buip:mfg:demo-dairy:order:2026-09-05-0042",
+    "buip:mfg:demo-dairy:line:3",
+    "buip:mfg:demo-dairy:equipment:pasteurizer-2"
+  ],
+  "tech_card_revision_ref": "buip:mfg:demo-dairy:tech-card:smetana20:rev:7",
+  "recipe_revision_ref": "buip:mfg:demo-dairy:recipe:smetana20:rev:4",
+  "order_ref": "buip:mfg:demo-dairy:order:2026-09-05-0042",
+  "operation_ref": "buip:mfg:demo-dairy:operation:pasteurization",
+  "payload": {
+    "product_sku": "smetana-20-500g",
+    "quantity": 480,
+    "unit": "упаковка",
+    "batch_size_kg": 240.0
+  },
+  "evidence_refs": [
+    "buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042"
+  ],
+  "parent_event_ids": [
+    "buip:evt:demo-dairy:0000000000981233"
+  ],
+  "depends_on_event_ids": [],
+  "caused_by_event_ids": [],
+  "supersedes_event_id": null,
+  "invalidates_event_id": null,
+  "event_time": "2026-09-05T07:42:10Z",
+  "received_time": "2026-09-05T07:42:11Z",
+  "committed_time": "2026-09-05T07:42:11.203Z",
+  "stream_sequence": 981234,
+  "source_adapter": "buip:adapter:mfg-terminal-nfc",
+  "device_id": "buip:device:demo-dairy:line3-term-02",
+  "session_id": "session-2026-09-05-shift1-042",
+  "clock_quality": "device_local",
+  "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
+  "schema_version": "0.1.0",
+  "crypto_suite": "unspecified-v0.1-pending-signature-decision",
+  "proof_level": "PL-1"
+}

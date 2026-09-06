@@ -1,0 +1,34 @@
+{
+  "event_id": "buip:evt:acme-notary:0000000000487213",
+  "tenant_id": "buip:tenant:acme-notary",
+  "namespace_id": "buip:ns:acme-notary",
+  "event_type": "document.signed.v1",
+  "subject_entity_id": "buip:acme-notary:document:2026-000481",
+  "actor_entity_id": "buip:acme-notary:agent:svc-esign-gateway-07",
+  "actor_authority_scope": "buip:policy:acme-notary:document-signing:v1",
+  "related_entity_refs": [
+    "buip:acme-notary:contract:2026-000481-a"
+  ],
+  "payload": {
+    "document_type": "service_agreement",
+    "page_count": 12,
+    "signing_method": "qualified_electronic_signature"
+  },
+  "evidence_refs": [
+    "buip:acme-notary:evidence:esign-session-99a1"
+  ],
+  "parent_event_ids": [],
+  "depends_on_event_ids": [],
+  "caused_by_event_ids": [],
+  "supersedes_event_id": null,
+  "invalidates_event_id": null,
+  "event_time": "2026-09-05T09:14:22Z",
+  "received_time": "2026-09-05T09:14:23Z",
+  "committed_time": "2026-09-05T09:14:23.512Z",
+  "stream_sequence": 48213,
+  "source_adapter": "buip:adapter:esign-gateway",
+  "idempotency_key": "esign-session-99a1:sign",
+  "schema_version": "0.1.0",
+  "crypto_suite": "unspecified-v0.1-pending-signature-decision",
+  "proof_level": "PL-1"
+}

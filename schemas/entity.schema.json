@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://circlemark.dev/schemas/v0.1/entity.schema.json",
+  "title": "Circle Mark Entity",
+  "description": "Каноническая сущность BUIP/Circle Mark. Источник полей: BizDNAi_BUIP_CircleMark_Technical_Specification_v0.1, раздел 6.1 (Entity). Схема нейтральна к отрасли: любой домен (производство, банк, логистика, документы, AI-агент) описывается одной и той же структурой сущности, а специфика домена выражается через entity_type и attributes, а не через новые обязательные поля.",
+  "type": "object",
+  "properties": {
+    "entity_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Стабильный, неизменяемый идентификатор сущности (спецификация: 128-bit binary + текстовое представление). Текстовая форма прототипа v0.1: 'buip:<namespace>:<entity-id>' (раздел 11 протокольного ТЗ); финальная URI-схема требует отдельной регистрации и здесь не фиксируется жёстким regex-паттерном."
+    },
+    "namespace_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Идентификатор namespace (string/URI-like). Один namespace имеет однозначную authority policy."
+    },
+    "entity_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ссылка на тип сущности в реестре онтологии (ontology reference), например 'buip:ontology:equipment' или 'buip:ontology:document'."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Момент создания сущности, RFC 3339 timestamp."
+    },
+    "authority_policy_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ссылка на policy, определяющую, кто и на каком основании может подписывать события/изменения статуса этой сущности."
+    },
+    "resolver_hints": {
+      "type": "array",
+      "description": "0..N подсказок resolver-эндпоинтов, где можно получить актуальный Identity Document (SHOULD, не обязательно).",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "suspended", "revoked", "destroyed"],
+      "description": "Текущий статус сущности. MUST быть event-derived: значение выводится из истории событий, а не устанавливается произвольной записью. Расширение набора значений выполняется через повышение schema_version, а не произвольным добавлением новых строк в свободном тексте."
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Расширяемый объект неструктурированных/доменных атрибутов сущности (MAY). Именно сюда, а не в ядро схемы, выносятся отраслевые особенности, не требующие отдельного протокольного поля.",
+      "default": {}
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Версия схемы сущности в формате семантического версионирования, например '0.1.0'."
+    }
+  },
+  "required": [
+    "entity_id",
+    "namespace_id",
+    "entity_type",
+    "created_at",
+    "authority_policy_id",
+    "status",
+    "schema_version"
+  ],
+  "additionalProperties": false
+}

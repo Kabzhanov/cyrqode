@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://circlemark.dev/schemas/v0.1/event.schema.json",
+  "title": "Circle Mark Canonical Event (core)",
+  "description": "Ядро канонического события BUIP/Circle Mark. Источники: BizDNAi_BUIP_CircleMark_Technical_Specification_v0.1 раздел 6.4 (Event) и раздел 7 (Canonical Event Format), а также manufacturing_buip_circle_mark_integration_ru.md раздел 6 (общий конверт события) — за вычетом производственно-специфичных полей. Это ЯДРО: оно НЕ содержит tech_card_revision_ref/recipe_revision_ref/order_ref/operation_ref и любых других отраслевых полей — они подключаются отдельными профилями через allOf/$ref (см. schemas/profile-manufacturing.schema.json). Ядро остаётся пригодным для банков, логистики, документов, AI-агентов и любых будущих отраслей без изменения.\n\nПримечание по именованию: протокольное ТЗ (6.4) использует 'subject/entity_id', 'actor_id', 'authority_scope', 'sequence'; производственное ТЗ (раздел 6) — 'subject_entity_id', 'actor_entity_id', 'actor_authority_scope', 'stream_sequence', 'namespace'. Схема нормализует имена к более развёрнутым формам производственного конверта и к 'namespace_id' (как в entity.schema.json) для консистентности между схемами; семантика полей не меняется.\n\nАлгоритм подписи НЕ выбран владельцем протокола на момент версии 0.1. Поля crypto_suite и signature намеренно оставлены типом string без enum/формата — конкретный криптографический профиль (алгоритм, кодировка, key id) фиксируется отдельным решением (см. раздел 15.2 протокольного ТЗ, Crypto Suite Registry) и последующим обновлением схемы через schema_version, а не домысливается здесь.",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Уникальный идентификатор события (MUST)."
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Идентификатор тенанта, в контуре которого зафиксировано событие (multi-tenant ядро платформы)."
+    },
+    "namespace_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Namespace, в котором действует authority для этого события (см. entity.schema.json:namespace_id)."
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Версионируемый тип события (MUST), например 'document.signed.v1' или 'manufacturing.batch.produced.v1'."
+    },
+    "subject_entity_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "entity_id основной сущности, к которой относится событие (MUST)."
+    },
+    "actor_entity_id": {
+      "type": ["string", "null"],
+      "description": "entity_id того, кто/что совершил действие (MUST, nullable для системных событий без актора-человека/сервиса)."
+    },
+    "actor_authority_scope": {
+      "type": "string",
+      "minLength": 1,
+      "description": "На каком основании подпись/действие актора допустимо (ссылка на authority scope, MUST)."
+    },
+    "related_entity_refs": {
+      "type": "array",
+      "description": "Дополнительные сущности, затронутые событием, помимо subject/actor (MAY).",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "payload": {
+      "type": ["object", "null"],
+      "description": "Нечувствительные данные события (MAY). Персональные данные и коммерческие секреты в payload не помещаются — для них используется payload_commitment/evidence_refs с off-ledger хранением."
+    },
+    "payload_commitment": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Hash/commitment для внешних/чувствительных данных, не помещаемых в payload напрямую (SHOULD)."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "Ссылки на evidence: документы, sensor observations, media (MAY).",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "parent_event_ids": {
+      "type": "array",
+      "description": "Причинные ссылки: родительские события (MAY).",
+      "items": { "type": "string", "minLength": 1 },
+      "default": []
+    },
+    "depends_on_event_ids": {
+      "type": "array",
+      "description": "Причинные ссылки: события, от которых зависит текущее (MAY).",
+      "items": { "type": "string", "minLength": 1 },
+      "default": []
+    },
+    "caused_by_event_ids": {
+      "type": "array",
+      "description": "Причинные ссылки: события, вызвавшие текущее (MAY).",
+      "items": { "type": "string", "minLength": 1 },
+      "default": []
+    },
+    "supersedes_event_id": {
+      "type": ["string", "null"],
+      "description": "Событие, которое заменяется текущим (используется для неразрушающей коррекции истории)."
+    },
+    "invalidates_event_id": {
+      "type": ["string", "null"],
+      "description": "Событие, которое аннулируется текущим (append-only: аннулирование — это новое событие, старое не удаляется)."
+    },
+    "event_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Заявленное время события (MUST)."
+    },
+    "received_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Время получения события авторитетным источником (MUST)."
+    },
+    "committed_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Время authoritative commit события (MUST)."
+    },
+    "stream_sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Монотонная последовательность события в рамках его stream/partition (MUST)."
+    },
+    "source_adapter": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Идентификатор адаптера/источника, доставившего событие (например Synapse-адаптер, Edge SDK)."
+    },
+    "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Идентификатор устройства-источника события, если применимо."
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Идентификатор сессии/боевого окна, в рамках которого создано событие (актуально для offline/edge)."
+    },
+    "clock_quality": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Метаданные качества источника времени устройства (например 'ntp_synced', 'device_local', 'unknown'). Точный перечень значений фиксируется профилем Edge SDK и здесь не ограничивается enum, чтобы не домысливать ещё не принятое решение."
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ключ идемпотентности, предотвращающий дубли при retry (MUST)."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Версия схемы события (MUST)."
+    },
+    "crypto_suite": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Идентификатор алгоритмического профиля (hash/signature suite), MUST. КОНКРЕТНЫЙ профиль подписи ещё не выбран владельцем протокола — значение не ограничено enum намеренно, чтобы не фиксировать невыбранное решение."
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Подпись actor/authority над канонизированным событием, MUST для критичных событий. Формат/кодировка подписи определяются выбранным crypto_suite, который на момент версии 0.1 ещё не зафиксирован отдельным решением владельца протокола."
+    },
+    "proof_level": {
+      "type": "string",
+      "enum": ["PL-0", "PL-1", "PL-2", "PL-3", "PL-4", "PL-5"],
+      "description": "Уровень доказательности конкретного события (раздел 17 протокольного ТЗ). Относится к событию, а не к репутации субъекта."
+    }
+  },
+  "required": [
+    "event_id",
+    "tenant_id",
+    "namespace_id",
+    "event_type",
+    "subject_entity_id",
+    "actor_entity_id",
+    "actor_authority_scope",
+    "event_time",
+    "received_time",
+    "committed_time",
+    "stream_sequence",
+    "idempotency_key",
+    "schema_version",
+    "crypto_suite"
+  ]
+}
