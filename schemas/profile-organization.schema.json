@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyrqode.dev/schemas/v0.1/profile-organization.schema.json",
+  "title": "Профиль организации",
+  "description": "Сведения о компании, которые заносятся ОДИН РАЗ и показываются при сканировании любой её продукции. Организация — самостоятельная сущность со своим идентификатором; партии, площадки и оборудование на неё ссылаются, а не дублируют её данные. Смена адреса, бренда или сайта — это новое событие об организации, а не правка тысяч записей о партиях. Историю при этом видно: что было заявлено на момент выпуска конкретной партии, остаётся в снимке внутри той партии.",
+  "allOf": [
+    { "$ref": "https://cyrqode.dev/schemas/v0.1/event.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "organization": {
+          "type": "object",
+          "required": ["legal_name", "country"],
+          "properties": {
+            "legal_name": { "type": "string", "minLength": 1, "description": "Полное юридическое наименование" },
+            "brand": { "type": "string", "description": "Торговая марка, под которой продукция известна покупателю" },
+            "identifier": {
+              "type": "object",
+              "description": "Идентификатор в реестре своей юрисдикции: БИН в Казахстане, ИНН/ОГРН в России, VAT/EIN и прочие. Тип указывается явно, потому что по одному номеру страну не угадать.",
+              "required": ["type", "value"],
+              "properties": {
+                "type": { "type": "string", "examples": ["БИН", "ИИН", "ИНН", "ОГРН", "VAT", "EIN"] },
+                "value": { "type": "string", "minLength": 1 },
+                "registry": { "type": "string", "description": "Кто ведёт реестр" }
+              }
+            },
+            "country": { "type": "string" },
+            "address": { "type": "string" },
+            "sites": {
+              "type": "array",
+              "description": "Площадки и цеха. У каждой площадки может быть собственный идентификатор сущности, если по ней нужна отдельная прослеживаемость.",
+              "items": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "address": { "type": "string" },
+                  "entity_id": { "type": "string" }
+                }
+              }
+            },
+            "contacts": {
+              "type": "object",
+              "additionalProperties": { "type": "string" },
+              "description": "Сайт, телефон, почта — то, куда покупатель может обратиться."
+            },
+            "about": { "type": "string", "description": "Короткий рассказ о компании для покупателя." },
+            "certificates": {
+              "type": "array",
+              "description": "Разрешения и сертификаты уровня компании, а не партии: лицензии, ХАССП, ISO.",
+              "items": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "number": { "type": "string" },
+                  "valid_until": { "type": "string" },
+                  "commitment": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["organization"]
+    }
+  ],
+  "unevaluatedProperties": false
+}

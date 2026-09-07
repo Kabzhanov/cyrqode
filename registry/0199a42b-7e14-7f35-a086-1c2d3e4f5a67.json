@@ -1,0 +1,50 @@
+{
+  "schema_version": "0.1.0",
+  "event_id": "0199a42b-8f25-7a46-b197-2d3e4f5a6b78",
+  "namespace_id": "demo",
+  "tenant_id": "demo",
+  "event_type": "organization.registered.v1",
+  "subject_entity_id": "0199a42b-7e14-7f35-a086-1c2d3e4f5a67",
+  "actor_entity_id": "0199a42b-7e14-7f35-a086-1c2d3e4f5a67",
+  "actor_authority_scope": "organization.self",
+  "event_time": "2026-09-06T00:00:00Z",
+  "stream_sequence": 1,
+  "source_adapter": "manual",
+  "idempotency_key": "demo-org-molochny-fermer-999",
+  "crypto_suite": "unsigned-v0.1",
+  "proof_level": "PL-0",
+  "payload": {
+    "note": "ДЕМОНСТРАЦИОННАЯ ЗАПИСЬ. Компания вымышлена и служит примером того, как сведения о производителе заносятся один раз и показываются при сканировании любой его продукции."
+  },
+  "organization": {
+    "legal_name": "Товарищество с ограниченной ответственностью «Молочный Фермер 999»",
+    "brand": "Молоко от бабули",
+    "identifier": {
+      "type": "БИН",
+      "value": "999940000999",
+      "registry": "Государственная база юридических лиц РК"
+    },
+    "country": "Казахстан",
+    "address": "Алматинская область, с. Демонстрационное, ул. Молочная, 999",
+    "sites": [
+      {
+        "name": "Цех розлива № 1",
+        "address": "Алматинская область, с. Демонстрационное, ул. Молочная, 999"
+      }
+    ],
+    "contacts": {
+      "Сайт": "example.kz",
+      "Телефон": "+7 700 000 00 00",
+      "Почта": "hello@example.kz"
+    },
+    "about": "Семейная молочная ферма: собственное стадо, приёмка сырого молока дважды в сутки, розлив в день дойки.",
+    "certificates": [
+      {
+        "name": "Система менеджмента безопасности пищевой продукции (ХАССП)",
+        "number": "KZ-HACCP-DEMO-999",
+        "valid_until": "2028-05-31"
+      }
+    ]
+  },
+  "payload_commitment": "5e0dc15f6e1d7a0b25daecefcf5c85432c51c584c97a046ffe8d3b40dd96990c"
+}

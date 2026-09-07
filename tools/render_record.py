@@ -137,7 +137,9 @@ def _passport_html(pp: dict, e) -> str:
   {'<div>Хранение</div><div>' + e(batch.get('storage','')) + '</div>' if batch.get('storage') else ''}
   {'<div>Площадка</div><div>' + e(prod.get('site','')) + '</div>' if prod.get('site') else ''}
   {'<div>Идентификатор</div><div><code>' + e(prod.get('identifier','')) + '</code></div>' if prod.get('identifier') else ''}
-</div></div>
+</div>
+{'<p style="margin:14px 0 0"><a href="/cyrqode/r/' + e(pp.get('producer_entity_id','')) + '/">О производителе →</a></p>' if pp.get('producer_entity_id') else ''}
+</div>
 
 {'<div class="card"><h2>Характеристики</h2><div class="rows">' + rows + '</div></div>' if rows else ''}
 {'<div class="card"><h2>Состав</h2><ul class="comp">' + comp_html + '</ul></div>' if comp_html else ''}
@@ -146,10 +148,49 @@ def _passport_html(pp: dict, e) -> str:
 """
 
 
+def _organization_html(org: dict, e) -> str:
+    """Страница компании: то, что заносится один раз и показывается при
+    сканировании любой её продукции."""
+    if not org:
+        return ""
+    ident = org.get("identifier", {}) or {}
+    sites = "".join(
+        f'<div class="doc"><b>{e(x.get("name",""))}</b>'
+        f'<span class="hash">{e(x.get("address",""))}</span></div>'
+        for x in org.get("sites", []) or [])
+    contacts = "".join(
+        f"<div>{e(k)}</div><div>{e(v)}</div>" for k, v in (org.get("contacts") or {}).items())
+    certs = "".join(
+        f'<div class="doc"><b>{e(c.get("name",""))}</b><span class="hash">'
+        f'{e(c.get("number",""))}'
+        f'{" · действует до " + e(c.get("valid_until","")) if c.get("valid_until") else ""}'
+        f"</span></div>" for c in org.get("certificates", []) or [])
+    return f"""
+<div class="card hero">
+  <h2>Компания</h2>
+  <p class="big">{e(org.get('brand') or org.get('legal_name',''))}</p>
+  <p class="sub" style="margin:6px 0 0">{e(org.get('legal_name',''))}</p>
+  {'<p>' + e(org.get('about','')) + '</p>' if org.get('about') else ''}
+</div>
+
+<div class="card"><h2>Реквизиты</h2><div class="rows">
+  {'<div>' + e(ident.get('type','Идентификатор')) + '</div><div><code>' + e(ident.get('value','')) + '</code></div>' if ident else ''}
+  {'<div>Реестр</div><div>' + e(ident.get('registry','')) + '</div>' if ident.get('registry') else ''}
+  <div>Страна</div><div>{e(org.get('country',''))}</div>
+  {'<div>Адрес</div><div>' + e(org.get('address','')) + '</div>' if org.get('address') else ''}
+</div></div>
+
+{'<div class="card"><h2>Площадки</h2>' + sites + '</div>' if sites else ''}
+{'<div class="card"><h2>Контакты</h2><div class="rows">' + contacts + '</div></div>' if contacts else ''}
+{'<div class="card"><h2>Сертификаты компании</h2>' + certs + '</div>' if certs else ''}
+"""
+
+
 def render(record: dict, json_url: str) -> str:
     p = record.get("payload", {})
     e = html.escape
     passport = _passport_html(record.get("product_passport"), e)
+    organization = _organization_html(record.get("organization"), e)
     freshness_script = FRESHNESS_JS if record.get("product_passport") else ""
     docs = ""
     for d in p.get("documents", []):
@@ -171,6 +212,7 @@ def render(record: dict, json_url: str) -> str:
 <p class="sub">{e(p.get('date',''))} · {e(p.get('author',''))}{
     ' · ' + e(p.get('author_role','')) if p.get('author_role') else ''}</p>
 
+{organization}
 {passport}
 {'<div class="card"><h2>What happened</h2><p>' + e(p.get('summary','')) + '</p></div>' if p.get('summary') else ''}
 
