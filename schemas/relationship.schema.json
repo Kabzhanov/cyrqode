@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cyrqode.dev/schemas/v0.1/relationship.schema.json",
-  "title": "Circle Mark Relationship",
+  "title": "BUIP Relationship",
   "description": "Связь между двумя сущностями BUIP. Источники полей: спецификация BUIP v0.1 раздел 6.2 (Relationship MUST быть first-class entity/event-derived object: тип, source, target, validity interval, authority/evidence, история) и производственный профиль BUIP раздел 5 (обязательные типы связей и производственная генеалогия). Схема единая — типы связей объединены из обоих источников без отдельного производственного профиля, т.к. relationship остаётся одной универсальной структурой независимо от домена.",
   "type": "object",
   "properties": {
@@ -52,7 +52,10 @@
       "description": "Начало интервала действия связи (validity interval)."
     },
     "valid_until": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "date-time",
       "description": "Конец интервала действия связи. null или отсутствие поля означает, что связь действует по настоящий момент."
     },
@@ -72,7 +75,12 @@
     },
     "status": {
       "type": "string",
-      "enum": ["active", "superseded", "invalidated", "corrected"],
+      "enum": [
+        "active",
+        "superseded",
+        "invalidated",
+        "corrected"
+      ],
       "description": "Статус связи, event-derived: выводится из истории событий (создание/supersedes/invalidates/corrects), а не редактируется напрямую."
     },
     "created_at": {
