@@ -1,0 +1,260 @@
+{
+  "$comment": "Тестовые векторы подписи событий BUIP (spec/adr/0001-crypto-and-identifiers.md). Ключи — тестовые, сгенерированы ОДИН РАЗ этим репозиторием и зафиксированы здесь для воспроизводимости у сторонних разработчиков; они не используются нигде, кроме как в этих векторах, и не являются продуктовыми ключами. Все значения (signing_input, sha256, подпись) посчитаны sdk/python/buip_signing.py и проверяются test-vectors/verify.py. Подробное объяснение см. test-vectors/README.md, раздел 'Подпись событий'.",
+  "what_is_signed": "signing_input = canonicalize(event без received_time, committed_time, stream_sequence и без signature), по RFC 8785 (JCS), через sdk/python/buip_canonical.canonicalize. Затем digest = SHA-256(signing_input) — и именно digest (32 байта, не JSON и не текст) подписывается алгоритмом, выбранным crypto_suite. Подпись кодируется в base64url БЕЗ padding.",
+  "profiles": {
+    "ed25519-sha256-v1": {
+      "algorithm": "Ed25519 (RFC 8032) над SHA-256(signing_input)",
+      "deterministic": true,
+      "private_key_pem": "-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIPEQFqrJhogr/PLFdukL1qRCCcOzFJOOECYsBRAS99OV\n-----END PRIVATE KEY-----\n",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAWDZli1y2TVZwIxSs20fJugDj6PBAyd593YpN2koQXhQ=\n-----END PUBLIC KEY-----\n",
+      "public_key_raw_b64url": "WDZli1y2TVZwIxSs20fJugDj6PBAyd593YpN2koQXhQ",
+      "cases": [
+        {
+          "name": "ed25519-sha256-v1_manufacturing_batch_produced",
+          "description": "Реалистичное событие manufacturing.batch.produced.v1 (по мотивам examples/event-manufacturing.json), подписанное тестовым ключом профиля. 'event' — как событие выглядит у клиента в момент подписания (серверных полей ещё нет). 'event_after_server_commit' — то же событие с добавленными received_time/committed_time/stream_sequence, как оно будет выглядеть после приёма в журнал: подпись по-прежнему проверяется, потому что эти поля не входят в подписываемую часть.",
+          "event": {
+            "event_id": "buip:evt:demo-dairy:0000000000981234",
+            "tenant_id": "buip:tenant:demo-dairy",
+            "namespace_id": "buip:ns:demo-dairy-mfg",
+            "event_type": "manufacturing.batch.produced.v1",
+            "subject_entity_id": "buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001",
+            "actor_entity_id": "buip:mfg:demo-dairy:terminal:line3-term-02",
+            "actor_authority_scope": "buip:policy:demo-dairy:operator-batch-release:v1",
+            "related_entity_refs": [
+              "buip:mfg:demo-dairy:order:2026-09-05-0042"
+            ],
+            "payload": {
+              "product_sku": "smetana-20-500g",
+              "quantity": 480,
+              "unit": "упаковка",
+              "batch_size_kg": 240.0
+            },
+            "evidence_refs": [
+              "buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042"
+            ],
+            "parent_event_ids": [],
+            "depends_on_event_ids": [],
+            "caused_by_event_ids": [],
+            "supersedes_event_id": null,
+            "invalidates_event_id": null,
+            "event_time": "2026-09-05T07:42:10Z",
+            "source_adapter": "buip:adapter:mfg-terminal-nfc",
+            "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
+            "schema_version": "0.1.0",
+            "crypto_suite": "ed25519-sha256-v1",
+            "proof_level": "PL-1",
+            "signature": "GvNeMAFG66FJ5muq0PIpp63OOlYegdHdhSmy3drTHAfH5PebBW42L9xnnlGLuBb2ceMCh2Q-9OqX11tarScdAw"
+          },
+          "event_after_server_commit": {
+            "event_id": "buip:evt:demo-dairy:0000000000981234",
+            "tenant_id": "buip:tenant:demo-dairy",
+            "namespace_id": "buip:ns:demo-dairy-mfg",
+            "event_type": "manufacturing.batch.produced.v1",
+            "subject_entity_id": "buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001",
+            "actor_entity_id": "buip:mfg:demo-dairy:terminal:line3-term-02",
+            "actor_authority_scope": "buip:policy:demo-dairy:operator-batch-release:v1",
+            "related_entity_refs": [
+              "buip:mfg:demo-dairy:order:2026-09-05-0042"
+            ],
+            "payload": {
+              "product_sku": "smetana-20-500g",
+              "quantity": 480,
+              "unit": "упаковка",
+              "batch_size_kg": 240.0
+            },
+            "evidence_refs": [
+              "buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042"
+            ],
+            "parent_event_ids": [],
+            "depends_on_event_ids": [],
+            "caused_by_event_ids": [],
+            "supersedes_event_id": null,
+            "invalidates_event_id": null,
+            "event_time": "2026-09-05T07:42:10Z",
+            "source_adapter": "buip:adapter:mfg-terminal-nfc",
+            "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
+            "schema_version": "0.1.0",
+            "crypto_suite": "ed25519-sha256-v1",
+            "proof_level": "PL-1",
+            "signature": "GvNeMAFG66FJ5muq0PIpp63OOlYegdHdhSmy3drTHAfH5PebBW42L9xnnlGLuBb2ceMCh2Q-9OqX11tarScdAw",
+            "received_time": "2026-09-05T07:42:11Z",
+            "committed_time": "2026-09-05T07:42:11.203Z",
+            "stream_sequence": 981234
+          },
+          "signing_input": "{\"actor_authority_scope\":\"buip:policy:demo-dairy:operator-batch-release:v1\",\"actor_entity_id\":\"buip:mfg:demo-dairy:terminal:line3-term-02\",\"caused_by_event_ids\":[],\"crypto_suite\":\"ed25519-sha256-v1\",\"depends_on_event_ids\":[],\"event_id\":\"buip:evt:demo-dairy:0000000000981234\",\"event_time\":\"2026-09-05T07:42:10Z\",\"event_type\":\"manufacturing.batch.produced.v1\",\"evidence_refs\":[\"buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042\"],\"idempotency_key\":\"line3-term-02:batch-produced:2026-09-05-0042:001\",\"invalidates_event_id\":null,\"namespace_id\":\"buip:ns:demo-dairy-mfg\",\"parent_event_ids\":[],\"payload\":{\"batch_size_kg\":240,\"product_sku\":\"smetana-20-500g\",\"quantity\":480,\"unit\":\"упаковка\"},\"proof_level\":\"PL-1\",\"related_entity_refs\":[\"buip:mfg:demo-dairy:order:2026-09-05-0042\"],\"schema_version\":\"0.1.0\",\"source_adapter\":\"buip:adapter:mfg-terminal-nfc\",\"subject_entity_id\":\"buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001\",\"supersedes_event_id\":null,\"tenant_id\":\"buip:tenant:demo-dairy\"}",
+          "signing_input_note": "Канонические байты (RFC 8785/JCS) события БЕЗ received_time, committed_time, stream_sequence и БЕЗ signature — ровно то, что возвращает buip_signing.signing_input(event). Это то же представление и та же функция canonicalize, что и в test-vectors/canonicalization.json — здесь просто применены к событию без служебных полей.",
+          "signing_input_sha256": "a87477efbddf817ebef8f426287ddec3a78d47d1406085a73bb3ae7e14700faa",
+          "signature_b64url": "GvNeMAFG66FJ5muq0PIpp63OOlYegdHdhSmy3drTHAfH5PebBW42L9xnnlGLuBb2ceMCh2Q-9OqX11tarScdAw",
+          "signature_comparison": "ДЕТЕРМИНИРОВАНО: Ed25519 не использует случайность при подписи, поэтому signature_b64url можно и нужно сравнивать побайтово (строкой) — сторонняя реализация обязана получить ЭТУ ЖЕ подпись на этом входе с этим ключом.",
+          "verify_expected": true
+        },
+        {
+          "name": "ed25519-sha256-v1_tampered_field_must_fail",
+          "description": "Тот же событие, что и в предыдущем случае, но с изменённым клиентским полем (payload.quantity) и ТОЙ ЖЕ подписью, скопированной из валидного случая. Проверка ДОЛЖНА провалиться: это отрицательный контрольный случай — изменение любого подписанного поля обязано ломать verify().",
+          "event": {
+            "event_id": "buip:evt:demo-dairy:0000000000981234",
+            "tenant_id": "buip:tenant:demo-dairy",
+            "namespace_id": "buip:ns:demo-dairy-mfg",
+            "event_type": "manufacturing.batch.produced.v1",
+            "subject_entity_id": "buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001",
+            "actor_entity_id": "buip:mfg:demo-dairy:terminal:line3-term-02",
+            "actor_authority_scope": "buip:policy:demo-dairy:operator-batch-release:v1",
+            "related_entity_refs": [
+              "buip:mfg:demo-dairy:order:2026-09-05-0042"
+            ],
+            "payload": {
+              "product_sku": "smetana-20-500g",
+              "quantity": 999999,
+              "unit": "упаковка",
+              "batch_size_kg": 240.0
+            },
+            "evidence_refs": [
+              "buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042"
+            ],
+            "parent_event_ids": [],
+            "depends_on_event_ids": [],
+            "caused_by_event_ids": [],
+            "supersedes_event_id": null,
+            "invalidates_event_id": null,
+            "event_time": "2026-09-05T07:42:10Z",
+            "source_adapter": "buip:adapter:mfg-terminal-nfc",
+            "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
+            "schema_version": "0.1.0",
+            "crypto_suite": "ed25519-sha256-v1",
+            "proof_level": "PL-1",
+            "signature": "GvNeMAFG66FJ5muq0PIpp63OOlYegdHdhSmy3drTHAfH5PebBW42L9xnnlGLuBb2ceMCh2Q-9OqX11tarScdAw"
+          },
+          "tampered_field": "payload.quantity",
+          "verify_expected": false
+        }
+      ]
+    },
+    "ecdsa-p256-sha256-v1": {
+      "algorithm": "ECDSA P-256 (FIPS 186-4) над SHA-256(signing_input), prehashed",
+      "deterministic": false,
+      "private_key_pem": "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgX1V6KcaP9Mn7T9Ze\nlDvH/gjJ680/dwgyyPHosdQazbahRANCAAReTsjZReZOX9X1XUgrA3yfEdbWnfE0\nE7iaPhOoyR6xIfUWF0Nm1EdgKR1Zy5fY3nQH2bRbKC8kvneJk5NGPbIk\n-----END PRIVATE KEY-----\n",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEXk7I2UXmTl/V9V1IKwN8nxHW1p3x\nNBO4mj4TqMkesSH1FhdDZtRHYCkdWcuX2N50B9m0WygvJL53iZOTRj2yJA==\n-----END PUBLIC KEY-----\n",
+      "public_key_raw_b64url": "BF5OyNlF5k5f1fVdSCsDfJ8R1tad8TQTuJo-E6jJHrEh9RYXQ2bUR2ApHVnLl9jedAfZtFsoLyS-d4mTk0Y9siQ",
+      "cases": [
+        {
+          "name": "ecdsa-p256-sha256-v1_manufacturing_batch_produced",
+          "description": "Реалистичное событие manufacturing.batch.produced.v1 (по мотивам examples/event-manufacturing.json), подписанное тестовым ключом профиля. 'event' — как событие выглядит у клиента в момент подписания (серверных полей ещё нет). 'event_after_server_commit' — то же событие с добавленными received_time/committed_time/stream_sequence, как оно будет выглядеть после приёма в журнал: подпись по-прежнему проверяется, потому что эти поля не входят в подписываемую часть.",
+          "event": {
+            "event_id": "buip:evt:demo-dairy:0000000000981234",
+            "tenant_id": "buip:tenant:demo-dairy",
+            "namespace_id": "buip:ns:demo-dairy-mfg",
+            "event_type": "manufacturing.batch.produced.v1",
+            "subject_entity_id": "buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001",
+            "actor_entity_id": "buip:mfg:demo-dairy:terminal:line3-term-02",
+            "actor_authority_scope": "buip:policy:demo-dairy:operator-batch-release:v1",
+            "related_entity_refs": [
+              "buip:mfg:demo-dairy:order:2026-09-05-0042"
+            ],
+            "payload": {
+              "product_sku": "smetana-20-500g",
+              "quantity": 480,
+              "unit": "упаковка",
+              "batch_size_kg": 240.0
+            },
+            "evidence_refs": [
+              "buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042"
+            ],
+            "parent_event_ids": [],
+            "depends_on_event_ids": [],
+            "caused_by_event_ids": [],
+            "supersedes_event_id": null,
+            "invalidates_event_id": null,
+            "event_time": "2026-09-05T07:42:10Z",
+            "source_adapter": "buip:adapter:mfg-terminal-nfc",
+            "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
+            "schema_version": "0.1.0",
+            "crypto_suite": "ecdsa-p256-sha256-v1",
+            "proof_level": "PL-1",
+            "signature": "MEUCIQDecO4kbYIZPf_WMRP5VO-03C_fGnk1NG8YVzeeW8mRmgIgUOirvMXhydFg4u9qHys3euIosyK_DUeDlafYo8LyaK4"
+          },
+          "event_after_server_commit": {
+            "event_id": "buip:evt:demo-dairy:0000000000981234",
+            "tenant_id": "buip:tenant:demo-dairy",
+            "namespace_id": "buip:ns:demo-dairy-mfg",
+            "event_type": "manufacturing.batch.produced.v1",
+            "subject_entity_id": "buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001",
+            "actor_entity_id": "buip:mfg:demo-dairy:terminal:line3-term-02",
+            "actor_authority_scope": "buip:policy:demo-dairy:operator-batch-release:v1",
+            "related_entity_refs": [
+              "buip:mfg:demo-dairy:order:2026-09-05-0042"
+            ],
+            "payload": {
+              "product_sku": "smetana-20-500g",
+              "quantity": 480,
+              "unit": "упаковка",
+              "batch_size_kg": 240.0
+            },
+            "evidence_refs": [
+              "buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042"
+            ],
+            "parent_event_ids": [],
+            "depends_on_event_ids": [],
+            "caused_by_event_ids": [],
+            "supersedes_event_id": null,
+            "invalidates_event_id": null,
+            "event_time": "2026-09-05T07:42:10Z",
+            "source_adapter": "buip:adapter:mfg-terminal-nfc",
+            "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
+            "schema_version": "0.1.0",
+            "crypto_suite": "ecdsa-p256-sha256-v1",
+            "proof_level": "PL-1",
+            "signature": "MEUCIQDecO4kbYIZPf_WMRP5VO-03C_fGnk1NG8YVzeeW8mRmgIgUOirvMXhydFg4u9qHys3euIosyK_DUeDlafYo8LyaK4",
+            "received_time": "2026-09-05T07:42:11Z",
+            "committed_time": "2026-09-05T07:42:11.203Z",
+            "stream_sequence": 981234
+          },
+          "signing_input": "{\"actor_authority_scope\":\"buip:policy:demo-dairy:operator-batch-release:v1\",\"actor_entity_id\":\"buip:mfg:demo-dairy:terminal:line3-term-02\",\"caused_by_event_ids\":[],\"crypto_suite\":\"ecdsa-p256-sha256-v1\",\"depends_on_event_ids\":[],\"event_id\":\"buip:evt:demo-dairy:0000000000981234\",\"event_time\":\"2026-09-05T07:42:10Z\",\"event_type\":\"manufacturing.batch.produced.v1\",\"evidence_refs\":[\"buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042\"],\"idempotency_key\":\"line3-term-02:batch-produced:2026-09-05-0042:001\",\"invalidates_event_id\":null,\"namespace_id\":\"buip:ns:demo-dairy-mfg\",\"parent_event_ids\":[],\"payload\":{\"batch_size_kg\":240,\"product_sku\":\"smetana-20-500g\",\"quantity\":480,\"unit\":\"упаковка\"},\"proof_level\":\"PL-1\",\"related_entity_refs\":[\"buip:mfg:demo-dairy:order:2026-09-05-0042\"],\"schema_version\":\"0.1.0\",\"source_adapter\":\"buip:adapter:mfg-terminal-nfc\",\"subject_entity_id\":\"buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001\",\"supersedes_event_id\":null,\"tenant_id\":\"buip:tenant:demo-dairy\"}",
+          "signing_input_note": "Канонические байты (RFC 8785/JCS) события БЕЗ received_time, committed_time, stream_sequence и БЕЗ signature — ровно то, что возвращает buip_signing.signing_input(event). Это то же представление и та же функция canonicalize, что и в test-vectors/canonicalization.json — здесь просто применены к событию без служебных полей.",
+          "signing_input_sha256": "0c221db789f02806bdb0e7a6d75c48e6fe697c8eb37a040caddbbfcae5e4219c",
+          "signature_b64url": "MEUCIQDecO4kbYIZPf_WMRP5VO-03C_fGnk1NG8YVzeeW8mRmgIgUOirvMXhydFg4u9qHys3euIosyK_DUeDlafYo8LyaK4",
+          "signature_comparison": "НЕДЕТЕРМИНИРОВАНО: ECDSA использует случайный nonce k при каждой подписи, поэтому один и тот же вход с одним и тем же ключом даёт РАЗНЫЕ подписи при каждом запуске sign(). signature_b64url здесь — лишь ОДИН конкретный пример подписи, полученный при генерации этого файла; сравнивать его побайтово со своей реализацией НЕЛЬЗЯ — это гарантированно разойдётся даже у корректной реализации. Правильная проверка — что приведённая подпись проходит verify() с приведённым public_key (это как раз verify_expected: true), и что ваша СОБСТВЕННАЯ подпись того же signing_input тоже проходит verify() с тем же ключом.",
+          "verify_expected": true
+        },
+        {
+          "name": "ecdsa-p256-sha256-v1_tampered_field_must_fail",
+          "description": "Тот же событие, что и в предыдущем случае, но с изменённым клиентским полем (payload.quantity) и ТОЙ ЖЕ подписью, скопированной из валидного случая. Проверка ДОЛЖНА провалиться: это отрицательный контрольный случай — изменение любого подписанного поля обязано ломать verify().",
+          "event": {
+            "event_id": "buip:evt:demo-dairy:0000000000981234",
+            "tenant_id": "buip:tenant:demo-dairy",
+            "namespace_id": "buip:ns:demo-dairy-mfg",
+            "event_type": "manufacturing.batch.produced.v1",
+            "subject_entity_id": "buip:mfg:demo-dairy:batch:smetana20-2026-09-05-001",
+            "actor_entity_id": "buip:mfg:demo-dairy:terminal:line3-term-02",
+            "actor_authority_scope": "buip:policy:demo-dairy:operator-batch-release:v1",
+            "related_entity_refs": [
+              "buip:mfg:demo-dairy:order:2026-09-05-0042"
+            ],
+            "payload": {
+              "product_sku": "smetana-20-500g",
+              "quantity": 999999,
+              "unit": "упаковка",
+              "batch_size_kg": 240.0
+            },
+            "evidence_refs": [
+              "buip:mfg:demo-dairy:evidence:qc-lab-result:2026-09-05-0042"
+            ],
+            "parent_event_ids": [],
+            "depends_on_event_ids": [],
+            "caused_by_event_ids": [],
+            "supersedes_event_id": null,
+            "invalidates_event_id": null,
+            "event_time": "2026-09-05T07:42:10Z",
+            "source_adapter": "buip:adapter:mfg-terminal-nfc",
+            "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
+            "schema_version": "0.1.0",
+            "crypto_suite": "ecdsa-p256-sha256-v1",
+            "proof_level": "PL-1",
+            "signature": "MEUCIQDecO4kbYIZPf_WMRP5VO-03C_fGnk1NG8YVzeeW8mRmgIgUOirvMXhydFg4u9qHys3euIosyK_DUeDlafYo8LyaK4"
+          },
+          "tampered_field": "payload.quantity",
+          "verify_expected": false
+        }
+      ]
+    }
+  }
+}

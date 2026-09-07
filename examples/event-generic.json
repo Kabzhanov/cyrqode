@@ -29,6 +29,6 @@
   "source_adapter": "buip:adapter:esign-gateway",
   "idempotency_key": "esign-session-99a1:sign",
   "schema_version": "0.1.0",
-  "crypto_suite": "unspecified-v0.1-pending-signature-decision",
+  "crypto_suite": "unsigned-v0.1",
   "proof_level": "PL-1"
 }

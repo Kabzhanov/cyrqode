@@ -41,6 +41,6 @@
   "clock_quality": "device_local",
   "idempotency_key": "line3-term-02:batch-produced:2026-09-05-0042:001",
   "schema_version": "0.1.0",
-  "crypto_suite": "unspecified-v0.1-pending-signature-decision",
+  "crypto_suite": "unsigned-v0.1",
   "proof_level": "PL-1"
 }
