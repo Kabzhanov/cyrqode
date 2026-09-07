@@ -1,0 +1,50 @@
+{
+  "schema_version": "0.1.0",
+  "event_id": "0199a43c-a137-7c68-d2b9-4f5a6b7c8d90",
+  "namespace_id": "demo",
+  "tenant_id": "demo",
+  "event_type": "product.registered.v1",
+  "subject_entity_id": "0199a43c-9026-7b57-c1a8-3e4f5a6b7c89",
+  "actor_entity_id": "0199a42b-7e14-7f35-a086-1c2d3e4f5a67",
+  "actor_authority_scope": "catalog.manage",
+  "event_time": "2026-09-01T00:00:00Z",
+  "stream_sequence": 1,
+  "source_adapter": "manual",
+  "idempotency_key": "demo-product-moloko-ot-babuli",
+  "crypto_suite": "unsigned-v0.1",
+  "proof_level": "PL-0",
+  "payload": {
+    "note": "ДЕМОНСТРАЦИОННАЯ ЗАПИСЬ. Продукт и производитель вымышлены."
+  },
+  "product": {
+    "name": "Молоко от бабули",
+    "brand": "Молоко от бабули",
+    "producer_entity_id": "0199a42b-7e14-7f35-a086-1c2d3e4f5a67",
+    "description": "Молоко цельное пастеризованное, без восстановления из сухого. Партия выпущена в утреннюю смену и прослеживается до приёмки сырого молока.",
+    "category": "Молоко питьевое пастеризованное",
+    "attributes": {
+      "Жирность": "3,2 %",
+      "Объём": "930 мл",
+      "Вид обработки": "Пастеризация 76 °C, 20 с",
+      "Упаковка": "Пюр-пак с крышкой"
+    },
+    "composition": [
+      "молоко цельное нормализованное"
+    ],
+    "nutrition": {
+      "Белки, г": 3.0,
+      "Жиры, г": 3.2,
+      "Углеводы, г": 4.7,
+      "Энергетическая ценность, ккал": 60
+    },
+    "storage": "От +2 до +6 °C. После вскрытия хранить не более 48 часов.",
+    "shelf_life": "10 суток с даты розлива",
+    "certificates": [
+      {
+        "name": "Декларация о соответствии ТР ТС 033/2013",
+        "number": "ЕАЭС N KZ Д-DEMO.00.00000"
+      }
+    ]
+  },
+  "payload_commitment": "127c974700c59fae100d9decf81d674697db3b4a95d1b6a5aca77fe91428955b"
+}

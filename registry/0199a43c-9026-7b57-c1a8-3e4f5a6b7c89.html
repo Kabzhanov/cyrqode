@@ -76,47 +76,16 @@ ul.comp { margin:0; padding-left:20px; }
 
 
 
-<div class="card hero">
-  <h2>Продукт</h2>
-  <p class="big">Молоко от бабули</p>
-  <p class="sub" style="margin:6px 0 0">Молоко от бабули, Казахстан</p>
-  <p>Молоко цельное пастеризованное, без восстановления из сухого. Партия выпущена в утреннюю смену и прослеживается до приёмки сырого молока.</p>
-  <p><span class="fresh" id="freshness" data-best="2026-09-16T04:20:00Z">Годен до 2026-09-16</span></p>
-</div>
-
-<div class="card"><h2>Эта партия</h2><div class="rows">
-  <div>Номер партии</div><div>L2609-06</div>
-  <div>Выпущена</div><div>2026-09-06 04:20</div>
-  <div>Годен до</div><div>2026-09-16 04:20</div>
-  <div>Объём выпуска</div><div>4800 упаковок</div>
-  <div>Площадка</div><div>Цех розлива № 1</div>
-  <div>Хранение</div><div>От +2 до +6 °C. После вскрытия хранить не более 48 часов.</div>
-</div></div>
-
-<div class="card"><h2>Характеристики</h2><div class="rows"><div>Жирность</div><div>3,2 %</div><div>Объём</div><div>930 мл</div><div>Вид обработки</div><div>Пастеризация 76 °C, 20 с</div><div>Упаковка</div><div>Пюр-пак с крышкой</div></div></div>
-<div class="card"><h2>Состав</h2><ul class="comp"><li>молоко цельное нормализованное</li></ul></div>
-<div class="card"><h2>Пищевая ценность на 100 мл</h2><div class="rows"><div>Белки, г</div><div>3.0</div><div>Жиры, г</div><div>3.2</div><div>Углеводы, г</div><div>4.7</div><div>Энергетическая ценность, ккал</div><div>60</div></div></div>
-<div class="card"><h2>Документы на продукт</h2><div class="doc"><b>Декларация о соответствии ТР ТС 033/2013</b><span class="hash">ЕАЭС N KZ Д-DEMO.00.00000</span></div></div>
-
-<div class="card"><h2>Производитель</h2>
-  <p class="big" style="font-size:17px">Товарищество с ограниченной ответственностью «Молочный Фермер 999»</p>
-  <div class="rows" style="margin-top:10px">
-  <div>БИН</div><div><code>999940000999</code></div>
-  <div>Страна</div><div>Казахстан</div>
-  </div>
-  <p style="margin:14px 0 0"><a href="/cyrqode/r/0199a42b-7e14-7f35-a086-1c2d3e4f5a67/">О производителе →</a></p>
-</div>
-
 
 
 
 
 <div class="card"><h2>Identity</h2><dl>
-<dt>Entity</dt><dd><code>0199a410-3b72-7c81-9d5e-4a6f2b8c0e13</code></dd>
+<dt>Entity</dt><dd><code>0199a43c-9026-7b57-c1a8-3e4f5a6b7c89</code></dd>
 <dt>Namespace</dt><dd>demo</dd>
-<dt>Event</dt><dd><code>0199a410-4c83-7d92-ae6f-5b7a3c9d1f24</code></dd>
-<dt>Type</dt><dd>batch.released.v1</dd>
-<dt>Time</dt><dd>2026-09-06T04:20:00Z</dd>
+<dt>Event</dt><dd><code>0199a43c-a137-7c68-d2b9-4f5a6b7c8d90</code></dd>
+<dt>Type</dt><dd>product.registered.v1</dd>
+<dt>Time</dt><dd>2026-09-01T00:00:00Z</dd>
 <dt>Proof level</dt><dd>PL-0</dd>
 </dl></div>
 
@@ -126,7 +95,7 @@ ul.comp { margin:0; padding-left:20px; }
 <p class="note">ДЕМОНСТРАЦИОННАЯ ЗАПИСЬ. Продукт и производитель вымышлены.</p></div>
 
 <footer>
-<p><a href="https://github.com/Kabzhanov/cyrqode/blob/main/registry/0199a410-3b72-7c81-9d5e-4a6f2b8c0e13.json">Raw record (JSON)</a> · the machine-readable source of this page.</p>
+<p><a href="https://github.com/Kabzhanov/cyrqode/blob/main/registry/0199a43c-9026-7b57-c1a8-3e4f5a6b7c89.json">Raw record (JSON)</a> · the machine-readable source of this page.</p>
 <div class="owner">
   <img src="/cyrqode/assets/bizdnai-logo.png" alt="BizDNAi">
   <span>Технология BizDNAi</span>
@@ -135,19 +104,4 @@ ul.comp { margin:0; padding-left:20px; }
 independent witnessing are a later layer, and this page does not pretend otherwise.</p>
 </footer>
 </div>
-<script>
-/* Единственный скрипт на странице: сравнить срок годности с датой устройства.
-   Без него пришлось бы либо промолчать о свежести, либо утверждать её, не зная
-   сегодняшнего числа. */
-(function () {
-  var el = document.getElementById("freshness");
-  if (!el) return;
-  var best = new Date(el.getAttribute("data-best"));
-  if (isNaN(best)) return;
-  var expired = best < new Date();
-  el.className = "fresh " + (expired ? "bad" : "ok");
-  el.textContent = (expired ? "Срок истёк " : "Годен до ") + best.toLocaleDateString();
-})();
-</script>
-
 </body></html>

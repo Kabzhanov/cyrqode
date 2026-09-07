@@ -97,6 +97,75 @@ ul.comp { margin:0; padding-left:20px; }
 """
 
 
+def _load_linked(entity_id: str, registry_dir: pathlib.Path):
+    """Читает связанную запись из реестра. Ссылки разрешаются на этапе
+    генерации: страница остаётся статической и работает без сети."""
+    if not entity_id:
+        return None
+    f = registry_dir / f"{entity_id}.json"
+    if not f.is_file():
+        return None
+    return json.loads(f.read_text(encoding="utf-8"))
+
+
+def _batch_html(batch: dict, product: dict, org: dict, e) -> str:
+    """Страница партии собирает воедино три уровня: партию, продукт и
+    компанию. Человек, отсканировавший упаковку, должен увидеть всё сразу, а
+    не ходить по ссылкам — при этом сами данные не продублированы, а
+    подтянуты из своих записей."""
+    if not batch:
+        return ""
+    pr = (product or {}).get("product", {}) or {}
+    og = (org or {}).get("organization", {}) or {}
+    best = batch.get("best_before", "")
+    q = batch.get("quantity") or {}
+
+    attrs = "".join(f"<div>{e(k)}</div><div>{e(str(v))}</div>" for k, v in (pr.get("attributes") or {}).items())
+    comp = "".join(f"<li>{e(c)}</li>" for c in (pr.get("composition") or []))
+    nutr = "".join(f"<div>{e(k)}</div><div>{e(str(v))}</div>" for k, v in (pr.get("nutrition") or {}).items())
+    certs = "".join(
+        f'<div class="doc"><b>{e(c.get("name",""))}</b><span class="hash">{e(c.get("number",""))}</span></div>'
+        for c in (pr.get("certificates") or []))
+
+    fresh = (f'<p><span class="fresh" id="freshness" data-best="{e(best)}">Годен до '
+             f'{e(best[:10])}</span></p>') if best else ""
+    producer_line = e(og.get("brand") or og.get("legal_name") or
+                      (batch.get("product_snapshot") or {}).get("producer_name", ""))
+
+    return f"""
+<div class="card hero">
+  <h2>Продукт</h2>
+  <p class="big">{e(pr.get('name') or (batch.get('product_snapshot') or {}).get('product_name',''))}</p>
+  <p class="sub" style="margin:6px 0 0">{producer_line}{', ' + e(og.get('country','')) if og.get('country') else ''}</p>
+  {'<p>' + e(pr.get('description','')) + '</p>' if pr.get('description') else ''}
+  {fresh}
+</div>
+
+<div class="card"><h2>Эта партия</h2><div class="rows">
+  <div>Номер партии</div><div>{e(batch.get('code',''))}</div>
+  <div>Выпущена</div><div>{e(batch.get('produced_at','')[:16].replace('T',' '))}</div>
+  {'<div>Годен до</div><div>' + e(best[:16].replace('T',' ')) + '</div>' if best else ''}
+  {'<div>Объём выпуска</div><div>' + e(str(q.get('value',''))) + ' ' + e(q.get('unit','')) + '</div>' if q else ''}
+  {'<div>Площадка</div><div>' + e(batch.get('site_name','')) + '</div>' if batch.get('site_name') else ''}
+  {'<div>Хранение</div><div>' + e(pr.get('storage','')) + '</div>' if pr.get('storage') else ''}
+</div></div>
+
+{'<div class="card"><h2>Характеристики</h2><div class="rows">' + attrs + '</div></div>' if attrs else ''}
+{'<div class="card"><h2>Состав</h2><ul class="comp">' + comp + '</ul></div>' if comp else ''}
+{'<div class="card"><h2>Пищевая ценность на 100 мл</h2><div class="rows">' + nutr + '</div></div>' if nutr else ''}
+{'<div class="card"><h2>Документы на продукт</h2>' + certs + '</div>' if certs else ''}
+
+<div class="card"><h2>Производитель</h2>
+  <p class="big" style="font-size:17px">{e(og.get('legal_name',''))}</p>
+  <div class="rows" style="margin-top:10px">
+  {'<div>' + e((og.get('identifier') or {}).get('type','')) + '</div><div><code>' + e((og.get('identifier') or {}).get('value','')) + '</code></div>' if og.get('identifier') else ''}
+  {'<div>Страна</div><div>' + e(og.get('country','')) + '</div>' if og.get('country') else ''}
+  </div>
+  {'<p style="margin:14px 0 0"><a href="/cyrqode/r/' + e(pr.get('producer_entity_id','')) + '/">О производителе →</a></p>' if pr.get('producer_entity_id') else ''}
+</div>
+"""
+
+
 def _passport_html(pp: dict, e) -> str:
     """Паспорт партии — то, ради чего покупатель вообще сканирует марку."""
     if not pp:
@@ -189,9 +258,16 @@ def _organization_html(org: dict, e) -> str:
 def render(record: dict, json_url: str) -> str:
     p = record.get("payload", {})
     e = html.escape
-    passport = _passport_html(record.get("product_passport"), e)
+    registry_dir = pathlib.Path(__file__).resolve().parent.parent / "registry"
+    batch = record.get("batch")
+    if batch:
+        product = _load_linked(batch.get("product_entity_id"), registry_dir)
+        org = _load_linked(((product or {}).get("product") or {}).get("producer_entity_id"), registry_dir)
+        passport = _batch_html(batch, product, org, e)
+    else:
+        passport = _passport_html(record.get("product_passport"), e)
     organization = _organization_html(record.get("organization"), e)
-    freshness_script = FRESHNESS_JS if record.get("product_passport") else ""
+    freshness_script = FRESHNESS_JS if (record.get("product_passport") or record.get("batch")) else ""
     docs = ""
     for d in p.get("documents", []):
         docs += (f'<div class="doc"><b>{e(d.get("name",""))}</b>'

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyrqode.dev/schemas/v0.1/profile-batch.schema.json",
+  "title": "Профиль партии",
+  "description": "Партия — самостоятельная сущность с собственным идентификатором и собственным знаком CYRQODE. Здесь живёт только то, что отличает один выпуск от другого: номер партии, дата производства, дата окончания срока, объём выпуска, площадка. Название, состав и характеристики берутся из продукта по ссылке, реквизиты компании — из организации. Новая партия — новая запись и новый знак: именно поэтому по знаку видно, когда сделана конкретная пачка.",
+  "allOf": [
+    {
+      "$ref": "https://cyrqode.dev/schemas/v0.1/event.schema.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "batch"
+      ],
+      "properties": {
+        "batch": {
+          "type": "object",
+          "required": [
+            "code",
+            "product_entity_id",
+            "produced_at"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Номер партии у производителя"
+            },
+            "product_entity_id": {
+              "type": "string",
+              "description": "Ссылка на продукт (SKU)"
+            },
+            "site_entity_id": {
+              "type": "string",
+              "description": "Ссылка на площадку, если она выделена отдельной сущностью"
+            },
+            "site_name": {
+              "type": "string"
+            },
+            "produced_at": {
+              "type": "string"
+            },
+            "best_before": {
+              "type": "string",
+              "description": "Конкретная дата: принадлежит партии, не продукту"
+            },
+            "quantity": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string"
+                }
+              }
+            },
+            "product_snapshot": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "Снимок сведений о продукте и производителе на момент выпуска. Нужен, чтобы через год было видно, что заявляли тогда, даже если рецептура или адрес изменились. Не источник актуальных данных."
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}
