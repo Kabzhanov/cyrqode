@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CYRQODE — метка, по которой можно доказать, что было на самом деле</title>
+<meta name="description" content="CYRQODE: один знак на предмете — и за ним вся история: из чего сделано, кем, на каком оборудовании, по чьему допуску. Открытый протокол, рабочий сканер и генератор знака.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/cyrqode/assets/cyrqode-symbol.png">
+<style>
+/* Те же CSS-переменные, что и у готовых страниц реестра (registry/*.html) —
+   одна визуальная система на всю публичную часть. */
+:root { --ink:#04101F; --accent:#4800FF; --muted:#5a6472; --line:#e3e6ec; --bg:#ffffff; --soft:#f7f8fb; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#eef1f6; --accent:#8f6bff; --muted:#9aa4b2; --line:#232833; --bg:#0d1117; --soft:#161b22; }
+}
+* { box-sizing:border-box; }
+body { margin:0; padding:24px 16px 64px; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:820px; margin:0 auto; }
+.top { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.top img { width:44px; height:44px; }
+.top .name { font-weight:700; letter-spacing:.04em; font-size:18px; }
+.top .kind { color:var(--muted); font-size:13px; }
+h1 { font-size:30px; line-height:1.25; margin:16px 0 8px; }
+h2 { font-size:20px; line-height:1.3; margin:0 0 8px; }
+.lead { font-size:18px; color:var(--muted); margin:0 0 28px; }
+p { margin:0 0 12px; }
+a { color:var(--accent); }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; overflow-wrap:anywhere; }
+.card { border:1px solid var(--line); border-radius:14px; padding:18px; margin:0 0 16px; }
+.card > h3 { font-size:13px; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--muted); margin:0 0 12px; font-weight:600; }
+.note { color:var(--muted); font-size:14px; }
+ul { margin:0 0 12px; padding-left:20px; }
+li { margin:0 0 6px; }
+
+/* Две явные точки входа. На телефоне — в столбик: это главный сценарий,
+   человек пришёл по QR с упаковки. */
+.cta { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:0 0 28px; }
+.cta a { display:block; border:1px solid var(--line); border-radius:14px; padding:20px 18px;
+  text-decoration:none; color:inherit; background:var(--soft); }
+.cta a:hover { border-color:var(--accent); }
+.cta .t { font-size:18px; font-weight:600; margin:0 0 6px; }
+.cta .d { color:var(--muted); font-size:14px; margin:0; }
+.cta .go { color:var(--accent); font-size:14px; margin:10px 0 0; display:block; }
+
+.demo { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+.demo a { text-decoration:none; color:inherit; text-align:center; display:block; }
+.demo img { width:120px; height:120px; max-width:100%; }
+.demo .lab { font-size:13px; color:var(--muted); margin-top:6px; }
+
+.rows { display:grid; grid-template-columns:minmax(140px,auto) 1fr; gap:8px 16px; }
+.rows div:nth-child(odd) { color:var(--muted); }
+
+.two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;
+  letter-spacing:.06em; text-transform:uppercase; }
+.pill.open { background:#e7f7ec; color:#0d6b2f; }
+.pill.shut { background:#fdeaea; color:#8f1d1d; }
+@media (prefers-color-scheme: dark) {
+  .pill.open { background:#123021; color:#7fe0a3; }
+  .pill.shut { background:#3a1717; color:#ff9a9a; }
+}
+
+footer { margin-top:32px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); padding-top:18px; }
+.owner { display:flex; align-items:center; gap:10px; margin-top:20px; }
+.owner img { width:28px; height:28px; }
+.owner span { color:var(--muted); font-size:13px; }
+
+@media (max-width: 560px) {
+  body { padding:16px 12px 48px; }
+  .wrap { max-width:100%; }
+  h1 { font-size:24px; }
+  .lead { font-size:16px; }
+  .card { padding:14px; border-radius:12px; }
+  .cta, .two { grid-template-columns:1fr; }
+  .rows { grid-template-columns:1fr; gap:2px 0; }
+  .rows div:nth-child(odd) { font-size:13px; margin-top:10px; }
+  code { font-size:12px; }
+}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="top">
+  <img src="/cyrqode/assets/cyrqode-symbol.png" alt="CYRQODE">
+  <div><div class="name">CYRQODE</div><div class="kind">открытый протокол · генератор · сканер</div></div>
+</div>
+
+<h1>Метка, по которой можно доказать, что было на самом деле.</h1>
+<p class="lead">Один знак на предмете — и за ним вся история: из чего сделано, кем, на
+каком оборудовании, по чьему допуску, с какими документами. Не «строка в базе», а
+цепочка неизменяемых событий, каждое со ссылкой на свою причину.</p>
+
+<div class="cta">
+  <a href="/cyrqode/scan/">
+    <div class="t">Прочитать циркод</div>
+    <div class="d">Наведите камеру телефона на метку. Сканер работает в браузере и
+      ничего не отправляет наружу — кадры с камеры остаются на устройстве.</div>
+    <span class="go">Открыть сканер →</span>
+  </a>
+  <a href="/cyrqode/make/">
+    <div class="t">Создать циркод</div>
+    <div class="d">Знак кодирует один идентификатор сущности — UUID. Вставьте его
+      и получите готовую векторную метку для печати или экрана.</div>
+    <span class="go">Открыть генератор →</span>
+  </a>
+</div>
+
+<div class="card">
+  <h3>Попробуйте на демонстрационных знаках</h3>
+  <div class="demo">
+    <a href="/cyrqode/r/0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70/">
+      <img src="/cyrqode/assets/cyrqode-genesis-mark.png" alt="Метка рождения технологии">
+      <div class="lab">Рождение технологии</div>
+    </a>
+    <a href="/cyrqode/r/0199a410-3b72-7c81-9d5e-4a6f2b8c0e13/">
+      <img src="/cyrqode/assets/marks/cyrqode-milk-batch.svg" alt="Метка партии молока">
+      <div class="lab">Партия молока</div>
+    </a>
+  </div>
+  <p class="note" style="margin:14px 0 0">Записи реестра — демонстрационные, продукты
+    и компании вымышлены. Реальные записи клиентов живут в базе сервиса и сюда не
+    попадают.</p>
+</div>
+
+<div class="card">
+  <h3>Что в записи есть, а чего нет</h3>
+  <div class="two">
+    <div>
+      <p><strong>Есть:</strong> факт, время, участники в виде идентификаторов, ссылки
+        на доказательства в виде хэшей.</p>
+    </div>
+    <div>
+      <p><strong>Нет и не будет:</strong> персональных данных, содержимого документов,
+        коммерческих условий.</p>
+    </div>
+  </div>
+  <p style="margin:12px 0 0">Запись доказывает, что документ с точно таким содержимым
+    существовал на указанную дату, <strong>не храня сам документ</strong>. Проверить
+    может любой: посчитать SHA-256 своей копии и сравнить с записью.</p>
+</div>
+
+<div class="card">
+  <h3>Знак — это номер, а не этикетка</h3>
+  <p>В кодовую область помещается ровно один идентификатор сущности и служебные поля
+    профиля. Прямой запрет спецификации: имя, дата, автор, владелец, цена, рейтинг,
+    местоположение, статус, срок годности, роль сотрудника, любой текст или URL.</p>
+  <p style="margin:0">Причина не в экономии места. Всё перечисленное меняется, а метка —
+    нет. Если зашить срок годности в знак, то при пересортировке партии придётся
+    перепечатывать физические носители.</p>
+</div>
+
+<div class="card">
+  <h3>Два принципа, определяющие всё остальное</h3>
+  <p><strong>Первый: ядро отраслево-нейтрально.</strong> Производство — первый и самый
+    насыщенный потребитель, но не предмет протокола. Производственные поля живут в
+    отдельном профиле, ядро о них не знает.</p>
+  <p style="margin:0"><strong>Второй: персональные данные в журнал не попадают.</strong>
+    Событие ссылается на идентификатор сущности, а не на человека. Кто именно скрыт за
+    идентификатором — знает только владелец данных в своей системе.</p>
+</div>
+
+<div class="card">
+  <h3>Границы: что публично, а что нет</h3>
+  <p>Ошибка в этой границе необратима: выпущенное под свободной лицензией не отзывается,
+    а попавшие в публичный репозиторий данные остаются в истории git навсегда.</p>
+  <div class="two">
+    <div>
+      <p><span class="pill open">Открыто</span></p>
+      <p class="note">Спецификация протокола, схемы, тестовые векторы, клиентские
+        библиотеки, генератор знака, сканер и демонстрационные записи реестра.
+        Спецификация и схемы — CC BY 4.0, код — Apache 2.0.</p>
+    </div>
+    <div>
+      <p><span class="pill shut">Закрыто</span></p>
+      <p class="note">Ядро журнала, резолвер, проекции и агрегаты, политики доступа,
+        эксплуатация. Это сервис, а не протокол: на нём живут данные конкретных
+        субъектов.</p>
+    </div>
+  </div>
+  <p class="note" style="margin:12px 0 0">Правило при сомнении: относится к протоколу —
+    публично, относится к эксплуатации — приватно.</p>
+</div>
+
+<div class="card">
+  <h3>Честно о статусе</h3>
+  <p><strong>Версия 0.1 — черновик.</strong> Спецификация открыта для реализации,
+    формат события ещё может измениться. Физический формат знака (геометрия, ёмкость,
+    коррекция ошибок) в генераторе работает, но помечен как проектный: финальные
+    значения устанавливаются лабораторными испытаниями печати и считывания. До них
+    обещать процент читаемости повреждённой метки было бы враньём.</p>
+  <p style="margin:0">Внешние свидетельства и распределённая проверка — более поздний
+    слой. Сейчас доказательность ограничена уровнями «подписано автором» и «принято
+    авторитетным журналом».</p>
+</div>
+
+<footer>
+  <p>CYRQODE™ — товарный знак BizDNAi. Технически совместимую реализацию можно делать
+    и называть совместимой.</p>
+  <p>Тексты страницы — из <code>README.md</code>, <code>BOUNDARIES.md</code> и
+    <code>registry/README.md</code> открытого репозитория <code>cyrqode</code>
+    (CC BY 4.0).</p>
+  <div class="owner">
+    <img src="/cyrqode/assets/bizdnai-logo.png" alt="BizDNAi">
+    <span>Технология BizDNAi</span>
+  </div>
+</footer>
+
+</div>
+</body></html>

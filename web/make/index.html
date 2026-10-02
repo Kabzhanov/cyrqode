@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Создать циркод — генератор знака CYRQODE</title>
+<meta name="description" content="Генератор физического знака CYRQODE: векторная метка по идентификатору сущности.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/cyrqode/assets/cyrqode-symbol.png">
+<style>
+:root { --ink:#04101F; --accent:#4800FF; --muted:#5a6472; --line:#e3e6ec; --bg:#ffffff; --soft:#f7f8fb; --bad:#8f1d1d; --ok:#0d6b2f; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#eef1f6; --accent:#8f6bff; --muted:#9aa4b2; --line:#232833; --bg:#0d1117; --soft:#161b22; --bad:#ff9a9a; --ok:#7fe0a3; }
+}
+* { box-sizing:border-box; }
+body { margin:0; padding:24px 16px 64px; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:720px; margin:0 auto; }
+.top { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.top img { width:44px; height:44px; }
+.top .name { font-weight:700; letter-spacing:.04em; font-size:18px; }
+.top .kind { color:var(--muted); font-size:13px; }
+h1 { font-size:26px; line-height:1.25; margin:16px 0 4px; }
+.sub { color:var(--muted); margin:0 0 24px; }
+.card { border:1px solid var(--line); border-radius:14px; padding:18px; margin:0 0 16px; }
+label { display:block; font-size:14px; color:var(--muted); margin:0 0 6px; }
+input[type=text], select { width:100%; padding:10px 12px; font-size:15px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); }
+select { font-family:inherit; }
+.field { margin:0 0 14px; }
+.check { display:flex; align-items:center; gap:9px; font-size:15px; color:var(--ink); }
+.check input { width:auto; }
+button { padding:12px 18px; font-size:15px; font-weight:600; border-radius:10px; border:0;
+  background:var(--accent); color:#fff; cursor:pointer; }
+button:disabled { opacity:.55; cursor:default; }
+.btn-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.secondary { background:transparent; color:var(--accent); border:1px solid var(--line); text-decoration:none;
+  display:inline-block; padding:12px 18px; border-radius:10px; font-weight:600; font-size:15px; }
+.out { text-align:center; }
+.out img { width:min(320px,80vw); height:auto; }
+.hint { color:var(--muted); font-size:14px; }
+.err { color:var(--bad); font-size:14px; margin:10px 0 0; min-height:20px; }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; overflow-wrap:anywhere; }
+a { color:var(--accent); }
+footer { margin-top:32px; color:var(--muted); font-size:13px; border-top:1px solid var(--line); padding-top:18px; }
+.owner { display:flex; align-items:center; gap:10px; margin-top:20px; }
+.owner img { width:28px; height:28px; }
+@media (max-width:560px) { body{padding:16px 12px 48px} .card{padding:14px;border-radius:12px} h1{font-size:22px} }
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="top">
+  <img src="/cyrqode/assets/cyrqode-symbol.png" alt="CYRQODE">
+  <div><div class="name">CYRQODE</div><div class="kind">генератор знака</div></div>
+</div>
+
+<h1>Создать циркод</h1>
+<p class="sub">Знак кодирует один идентификатор сущности — UUID — и ничего больше.</p>
+
+<form id="gen" autocomplete="off">
+  <div class="card">
+    <div class="field">
+      <label for="entity-id">Entity ID (UUID) — единственное, что попадает в знак</label>
+      <input type="text" id="entity-id" name="entity_id" required spellcheck="false"
+             placeholder="0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70" maxlength="36">
+    </div>
+    <div class="field">
+      <label for="ns">Namespace hint</label>
+      <select id="ns" name="namespace">
+        <option value="bizdnai">bizdnai</option>
+        <option value="unspecified">unspecified</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="th">Type hint</label>
+      <select id="th" name="type_hint">
+        <option value="document">document</option>
+        <option value="product">product</option>
+        <option value="batch">batch</option>
+        <option value="material">material</option>
+        <option value="device">device</option>
+        <option value="asset">asset</option>
+        <option value="vehicle">vehicle</option>
+        <option value="building">building</option>
+        <option value="badge">badge</option>
+        <option value="unspecified">unspecified</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="rh">Resolver hint</label>
+      <select id="rh" name="resolver_hint">
+        <option value="default">default</option>
+        <option value="public-registry">public-registry</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="check">
+        <input type="checkbox" id="accent" name="accent_core" checked>
+        Фиолетовое ядро (не меняет данные знака)
+      </label>
+    </div>
+    <div class="btn-row">
+      <button type="submit" id="go">Построить знак</button>
+      <span class="hint">Печать в SVG — вектор, масштабируется без потерь.</span>
+    </div>
+    <p class="err" id="err" role="alert"></p>
+  </div>
+</form>
+
+<div class="card out" id="out" hidden>
+  <img id="preview" alt="Сгенерированный знак CYRQODE">
+  <p style="margin:14px 0 0"><a id="dl" download="cyrqode-mark.svg" href="#">Скачать SVG</a></p>
+  <p class="hint" style="margin:8px 0 0">Проверьте знак сканером перед печатью партии.</p>
+</div>
+
+<div class="card">
+  <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 10px">Что здесь происходит</h3>
+  <p style="font-size:15px">Знак рисуется на сервере тем же кодом, что и эталонный
+    генератор (<code>tools/cm_render.py</code>, Apache 2.0), и отдаётся вектором. В
+    браузер уходит только готовая картинка — код кодирования на этой странице не
+    выполняется.</p>
+  <p style="font-size:15px;margin:0"><strong>Это создание знака, а не события.</strong>
+    Страница ничего не пишет в журнал: чтобы событие появилось, его нужно отправить
+    коннектором журнала.</p>
+</div>
+
+<footer>
+  <p>Свой генератор целиком — в открытом репозитории: профиль
+    <code>cm-v0.1-draft-a</code>, 256 бит, проверка round-trip.</p>
+  <div class="owner"><img src="/cyrqode/assets/bizdnai-logo.png" alt="BizDNAi"><span>Технология BizDNAi</span></div>
+</footer>
+
+</div>
+<script>
+(function () {
+  var UUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  var form = document.getElementById("gen");
+  var out = document.getElementById("out");
+  var prev = document.getElementById("preview");
+  var dl = document.getElementById("dl");
+  var err = document.getElementById("err");
+  var go = document.getElementById("go");
+
+  function build(params) {
+    return "/cyrqode/make/render.svg?" + params.toString();
+  }
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    err.textContent = "";
+    var id = document.getElementById("entity-id").value.trim();
+    if (!UUID.test(id)) {
+      err.textContent = "Нужен UUID в каноническом виде: 8-4-4-4-12, только 0-9a-f.";
+      return;
+    }
+    var p = new URLSearchParams();
+    p.set("entity_id", id.toLowerCase());
+    p.set("namespace", document.getElementById("ns").value);
+    p.set("type_hint", document.getElementById("th").value);
+    p.set("resolver_hint", document.getElementById("rh").value);
+    p.set("accent_core", document.getElementById("accent").checked ? "1" : "0");
+
+    go.disabled = true;
+    var url = build(p);
+    // Сначала грузим во временный Image: если рендер не удался, битый img даст
+    // onerror — наружу не уйдёт ни HTML-страницы, ни текста ошибки сервиса.
+    var probe = new Image();
+    probe.onload = function () {
+      prev.src = url;
+      dl.href = url;
+      out.hidden = false;
+      go.disabled = false;
+      out.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    };
+    probe.onerror = function () {
+      go.disabled = false;
+      err.textContent = "Не удалось построить знак. Проверьте UUID и попробуйте ещё раз.";
+    };
+    probe.src = url;
+  });
+})();
+</script>
+</body></html>

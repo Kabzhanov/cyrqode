@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Запись — CYRQODE</title>
+<meta name="description" content="Identity Document записи циркода: идентификатор, тип, статус, ссылки резолвера.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/cyrqode/assets/cyrqode-symbol.png">
+<style>
+/* Те же переменные и карточки, что у готовых страниц реестра. */
+:root { --ink:#04101F; --accent:#4800FF; --muted:#5a6472; --line:#e3e6ec; --bg:#ffffff; --bad:#8f1d1d; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#eef1f6; --accent:#8f6bff; --muted:#9aa4b2; --line:#232833; --bg:#0d1117; --bad:#ff9a9a; }
+}
+* { box-sizing:border-box; }
+body { margin:0; padding:24px 16px 64px; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+.wrap { max-width:720px; margin:0 auto; }
+.top { display:flex; align-items:center; gap:12px; margin:0 0 20px; }
+.top img { width:44px; height:44px; }
+.top .name { font-weight:700; letter-spacing:.04em; font-size:18px; }
+.top .kind { color:var(--muted); font-size:13px; }
+h1 { font-size:26px; line-height:1.25; margin:16px 0 4px; word-break:break-word; }
+.sub { color:var(--muted); margin:0 0 28px; }
+.card { border:1px solid var(--line); border-radius:14px; padding:18px; margin:0 0 16px; }
+.card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--muted); margin:0 0 12px; font-weight:600; }
+dl { display:grid; grid-template-columns:minmax(120px,auto) 1fr; gap:8px 16px; margin:0; }
+dt { color:var(--muted); }
+dd { margin:0; overflow-wrap:anywhere; }
+code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px;
+  overflow-wrap:anywhere; word-break:break-all; }
+.note { color:var(--muted); font-size:14px; }
+.err { color:var(--bad); }
+a { color:var(--accent); }
+footer { margin-top:32px; color:var(--muted); font-size:13px; }
+.owner { display:flex; align-items:center; gap:10px; margin-top:20px;
+  padding-top:18px; border-top:1px solid var(--line); }
+.owner img { width:28px; height:28px; }
+@media (max-width:560px) {
+  body { padding:16px 12px 48px; }
+  h1 { font-size:22px; }
+  .card { padding:14px; border-radius:12px; }
+  dl { grid-template-columns:1fr; gap:2px 0; }
+  dt { font-size:13px; margin-top:10px; }
+  code { font-size:12px; }
+}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="top">
+  <img src="/cyrqode/assets/cyrqode-symbol.png" alt="CYRQODE">
+  <div><div class="name">CYRQODE</div><div class="kind">Identity Document</div></div>
+</div>
+
+<h1 id="title">Загружаем запись…</h1>
+<p class="sub" id="subtitle">&nbsp;</p>
+
+<div id="body">
+  <div class="card"><p class="note">Запрашиваем актуальный Identity Document у резолвера…</p></div>
+</div>
+
+<footer>
+  <p><a id="raw" href="#">Актуальная запись (JSON)</a> — то, что показано выше, дословно.</p>
+  <div class="owner">
+    <img src="/cyrqode/assets/bizdnai-logo.png" alt="BizDNAi">
+    <span>Технология BizDNAi</span>
+  </div>
+</footer>
+
+</div>
+<script>
+/* Страница сущности для тех, кого нет в статическом реестре: строится из
+   данных резолвера. Значения вставляются через textContent, не innerHTML —
+   ответ резолвера не должен уметь разметку. */
+(function () {
+  var UUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+  var m = location.pathname.match(/\/cyrqode\/r\/([^/]+)\/?$/);
+  var id = m ? decodeURIComponent(m[1]) : "";
+
+  var title = document.getElementById("title");
+  var subtitle = document.getElementById("subtitle");
+  var body = document.getElementById("body");
+  var raw = document.getElementById("raw");
+
+  function card(titleText) {
+    var c = document.createElement("div");
+    c.className = "card";
+    var h = document.createElement("h2");
+    h.textContent = titleText;
+    c.appendChild(h);
+    return c;
+  }
+
+  function rows(pairs) {
+    var dl = document.createElement("dl");
+    pairs.forEach(function (p) {
+      var dt = document.createElement("dt");
+      dt.textContent = p[0];
+      var dd = document.createElement("dd");
+      if (p[2]) { var code = document.createElement("code"); code.textContent = p[1]; dd.appendChild(code); }
+      else dd.textContent = p[1];
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+    return dl;
+  }
+
+  function fail(msg) {
+    title.textContent = "Запись не найдена";
+    subtitle.textContent = id;
+    body.textContent = "";
+    var c = card("Нет ответа для этого идентификатора");
+    var p = document.createElement("p");
+    p.className = "note err";
+    p.textContent = msg;
+    c.appendChild(p);
+    var p2 = document.createElement("p");
+    p2.className = "note";
+    p2.textContent = "Публичный реестр отдаёт записи по известному идентификатору; " +
+                     "общего каталога сущностей намеренно нет.";
+    c.appendChild(p2);
+    body.appendChild(c);
+  }
+
+  if (!UUID.test(id)) { fail("Идентификатор не похож на UUID."); return; }
+
+  title.textContent = id;
+  raw.href = "/cyrqode/v1/resolve/" + encodeURIComponent(id);
+
+  fetch(raw.href, { headers: { "Accept": "application/json" } })
+    .then(function (r) {
+      if (r.status === 404) { fail("Резолвер не знает такой идентификатор в пределах своего тенанта."); return null; }
+      if (!r.ok) { fail("Резолвер ответил кодом " + r.status + "."); return null; }
+      return r.json();
+    })
+    .then(function (d) {
+      if (!d) return;
+      title.textContent = d.entity_id || id;
+      subtitle.textContent = "запись реестра · " + (d.entity_type || "—");
+
+      var identity = card("Identity");
+      identity.appendChild(rows([
+        ["Entity", d.entity_id, true],
+        ["Type", d.entity_type],
+        ["Namespace", d.namespace_id],
+        ["Status", d.status],
+        ["Schema", d.schema_version]
+      ]));
+      body.appendChild(identity);
+
+      var hints = Array.isArray(d.resolver_hints) ? d.resolver_hints : [];
+      var res = card("Resolver hints");
+      if (hints.length) {
+        var ul = document.createElement("ul");
+        hints.forEach(function (h) {
+          var li = document.createElement("li");
+          li.textContent = typeof h === "string" ? h : JSON.stringify(h);
+          ul.appendChild(li);
+        });
+        res.appendChild(ul);
+      } else {
+        var pn = document.createElement("p");
+        pn.className = "note";
+        pn.textContent = "Сущность не объявила дополнительных адресов резолвера.";
+        res.appendChild(pn);
+      }
+      body.appendChild(res);
+
+      var what = card("Why the mark carries no data");
+      var pw = document.createElement("p");
+      pw.className = "note";
+      pw.textContent = "Метка несёт только идентификатор. Всё остальное — имя, документы, " +
+        "условия — живёт в журнале и раскрывается по правилам владельца данных, " +
+        "а не печатается на носителе.";
+      what.appendChild(pw);
+      body.appendChild(what);
+    })
+    .catch(function () {
+      fail("Не удалось связаться с резолвером.");
+    });
+})();
+</script>
+</body></html>
