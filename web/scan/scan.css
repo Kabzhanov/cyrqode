@@ -9,6 +9,26 @@
   --surface: #f3f2f7;
 }
 
+.lang-en, .lang-ru, .lang-kz { display:none; }
+html[data-lang="en"] .lang-en,
+html[data-lang="ru"] .lang-ru,
+html[data-lang="kz"] .lang-kz { display:inline; }
+
+.language-toggle {
+  position:fixed;
+  z-index:20;
+  top:max(12px, env(safe-area-inset-top));
+  right:12px;
+  padding:8px 14px;
+  border:0;
+  border-radius:8px;
+  color:#fff;
+  background:#111827;
+  box-shadow:0 0 10px #00D4FF, 0 0 16px #D81BFF;
+  font-size:16px;
+  cursor:pointer;
+}
+
 * { box-sizing: border-box; }
 
 html, body {

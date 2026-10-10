@@ -7,6 +7,89 @@
 (function () {
   "use strict";
 
+  var LANG_KEY = "bizdnaii_site_lang";
+  var LANGS = ["en", "ru", "kz"];
+  var TEXT = {
+    en: {
+      scan: "Scan", aim: "Point CYRQODE at the target", recognizing: "Reading…",
+      cameraUnsupported: "This browser does not support camera access (getUserMedia is unavailable).",
+      cameraDenied: "Camera access was denied or is unavailable (",
+      cameraHint: "). This often happens when a messaging app opens the page in its built-in browser (Android WebView) without camera permission.",
+      imageRead: "Could not read the image (",
+      imageNotFound: "Could not find the mark core in the photo (",
+      imageHint: "). Make sure the whole CYRQODE mark is in frame and well lit.",
+      imageLoad: "Could not load the selected file as an image.",
+      successTitle: "CYRQODE recognized",
+      successText: "The CRC-16 checksum matches. The identifier was recognized; a registry record may not exist — this was not checked.",
+      partialTitle: "CYRQODE partially recognized",
+      partialText: "The checksum did not match. Possible causes: the mark is not fully in the target, glare, low print contrast, or camera movement. Aim more precisely and try again.",
+      errorTitle: "Could not recognize",
+      record: "Record", profile: "Profile version", openRecord: "Open record", rawData: "Raw data (JSON)"
+    },
+    ru: {
+      scan: "Сканировать", aim: "Наведите CYRQODE в прицел", recognizing: "Распознаю…",
+      cameraUnsupported: "Этот браузер/окно не поддерживает доступ к камере (getUserMedia недоступен).",
+      cameraDenied: "Доступ к камере не выдан или недоступен (",
+      cameraHint: "). Частый случай — приложение открыло страницу во встроенном просмотрщике (Android WebView) без разрешения на камеру.",
+      imageRead: "Не удалось прочитать изображение (",
+      imageNotFound: "Не удалось найти ядро метки на фото (",
+      imageHint: "). Убедитесь, что CYRQODE целиком попадает в кадр и хорошо освещена.",
+      imageLoad: "Не удалось загрузить выбранный файл как изображение.",
+      successTitle: "CYRQODE распознан",
+      successText: "Контрольная сумма (CRC-16) сошлась. Идентификатор распознан; запись в реестре может отсутствовать — это не проверялось.",
+      partialTitle: "CYRQODE распознан частично",
+      partialText: "Контрольная сумма не сошлась. Возможные причины: CYRQODE не полностью в прицеле, блики, недостаточный контраст печати или движение камеры. Наведите CYRQODE точнее и попробуйте снова.",
+      errorTitle: "Не удалось распознать",
+      record: "Запись", profile: "Версия профиля", openRecord: "Открыть запись", rawData: "Сырые данные (JSON)"
+    },
+    kz: {
+      scan: "Сканерлеу", aim: "CYRQODE белгісін көздеу шеңберіне бағыттаңыз", recognizing: "Оқылуда…",
+      cameraUnsupported: "Бұл браузер камераға қол жеткізуді қолдамайды (getUserMedia қолжетімсіз).",
+      cameraDenied: "Камераға рұқсат берілмеді немесе камера қолжетімсіз (",
+      cameraHint: "). Бұл мессенджер бетті камераға рұқсат бермейтін кіріктірілген браузерде (Android WebView) ашқанда жиі кездеседі.",
+      imageRead: "Суретті оқу мүмкін болмады (",
+      imageNotFound: "Фотодан белгі өзегін табу мүмкін болмады (",
+      imageHint: "). CYRQODE белгісі кадрға толық сыйғанын және жарық жеткілікті екенін тексеріңіз.",
+      imageLoad: "Таңдалған файлды сурет ретінде жүктеу мүмкін болмады.",
+      successTitle: "CYRQODE танылды",
+      successText: "CRC-16 бақылау сомасы сәйкес. Идентификатор танылды; тізілімдегі жазбаның бар-жоғы тексерілген жоқ.",
+      partialTitle: "CYRQODE ішінара танылды",
+      partialText: "Бақылау сомасы сәйкес келмеді. Себептері: белгі көздеу шеңберіне толық түспеген, жарық шағылысқан, баспа контрасты төмен немесе камера қозғалған болуы мүмкін. Дәлірек бағыттап, қайталап көріңіз.",
+      errorTitle: "Тану мүмкін болмады",
+      record: "Жазба", profile: "Профиль нұсқасы", openRecord: "Жазбаны ашу", rawData: "Шикі деректер (JSON)"
+    }
+  };
+  var currentLang = "en";
+  function t(key) { return TEXT[currentLang][key]; }
+  function setLanguage(lang, persist) {
+    currentLang = LANGS.indexOf(lang) !== -1 ? lang : "en";
+    document.documentElement.lang = currentLang;
+    document.documentElement.setAttribute("data-lang", currentLang);
+    var toggle = document.getElementById("language-toggle");
+    if (toggle) toggle.textContent = currentLang.toUpperCase();
+    if (toggle) toggle.setAttribute("aria-label", currentLang === "en" ? "Change language" : currentLang === "ru" ? "Сменить язык" : "Тілді ауыстыру");
+    var start = document.getElementById("btn-start-scan");
+    if (start) start.setAttribute("aria-label", t("scan"));
+    var back = document.getElementById("btn-camera-back");
+    if (back) back.setAttribute("aria-label", currentLang === "en" ? "Back" : currentLang === "ru" ? "Назад" : "Артқа");
+    document.title = currentLang === "en" ? "CYRQODE Circle Mark — Scanner (v0.1)" : currentLang === "ru" ? "CYRQODE Circle Mark — сканер (v0.1)" : "CYRQODE Circle Mark — сканер (0.1-нұсқа)";
+    var description = document.querySelector('meta[name="description"]');
+    if (description) description.content = currentLang === "en" ? "Scan a CYRQODE Circle Mark. Version 0.1." : currentLang === "ru" ? "Сканер физического знака Circle Mark (CYRQODE). Версия 0.1." : "CYRQODE Circle Mark белгісін сканерлеу. 0.1-нұсқа.";
+    if (persist) {
+      try {
+        localStorage.setItem(LANG_KEY, currentLang);
+        localStorage.setItem("bizdnaii_widget_lang", currentLang);
+      } catch (e) {}
+      try { window.dispatchEvent(new CustomEvent("bizdnaii-language-change", { detail: { language: currentLang } })); } catch (e) {}
+    }
+  }
+  try { setLanguage(localStorage.getItem(LANG_KEY) || document.documentElement.getAttribute("data-lang") || "en", false); }
+  catch (e) { setLanguage(document.documentElement.getAttribute("data-lang") || "en", false); }
+  var languageToggle = document.getElementById("language-toggle");
+  if (languageToggle) languageToggle.addEventListener("click", function () {
+    setLanguage(LANGS[(LANGS.indexOf(currentLang) + 1) % LANGS.length], true);
+  });
+
   var EXPECTED_NAMESPACE_INFO = null; // не проверяем реестр — просто предупреждаем в тексте
   // Адрес реестра знает СКАНЕР, а не марка: в марку зашит лишь код резолвера
   // (см. resolver_hint). Поэтому переезд реестра не обесценивает выпущенные
@@ -86,7 +169,7 @@
   function startCameraFlow() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       showCameraUnavailable(
-        "Этот браузер/окно не поддерживает доступ к камере (getUserMedia недоступен)."
+        t("cameraUnsupported")
       );
       return;
     }
@@ -98,7 +181,7 @@
         showScreen("camera");
         state.consecutiveCrcFail = 0;
         state.locked = false;
-        setCameraStatus("Наведите CYRQODE в прицел");
+        setCameraStatus(t("aim"));
         els.video.play().catch(function () {});
         els.video.onloadedmetadata = function () {
           startScanLoop();
@@ -106,10 +189,9 @@
       })
       .catch(function (err) {
         var msg =
-          "Доступ к камере не выдан или недоступен (" +
+          t("cameraDenied") +
           (err && err.name ? err.name : String(err)) +
-          "). Частый случай — приложение открыло страницу во встроенном просмотрщике " +
-          "(Android WebView) без разрешения на камеру.";
+          t("cameraHint");
         showCameraUnavailable(msg);
       });
   }
@@ -206,7 +288,7 @@
   function handleFrameResult(result) {
     if (!result.ok) {
       state.consecutiveCrcFail = 0;
-      setCameraStatus("Наведите CYRQODE в прицел");
+      setCameraStatus(t("aim"));
       return;
     }
     if (result.payload.integrity_ok) {
@@ -218,7 +300,7 @@
       return;
     }
     state.consecutiveCrcFail++;
-    setCameraStatus("Распознаю…");
+    setCameraStatus(t("recognizing"));
     if (state.consecutiveCrcFail >= CRC_FAIL_THRESHOLD) {
       state.locked = true;
       clearInterval(state.loopTimer);
@@ -248,7 +330,7 @@
       try {
         imageData = ctx.getImageData(0, 0, w, h);
       } catch (e) {
-        showResultError("Не удалось прочитать изображение (" + e + ").");
+        showResultError(t("imageRead") + e + ").");
         return;
       }
       var sampler = CMScanCore.makeSampler(imageData);
@@ -263,8 +345,7 @@
       });
       if (!result.ok) {
         showResultError(
-          "Не удалось найти ядро метки на фото (" + result.reason + "). " +
-          "Убедитесь, что CYRQODE целиком попадает в кадр и хорошо освещена."
+          t("imageNotFound") + result.reason + t("imageHint")
         );
         return;
       }
@@ -276,7 +357,7 @@
     };
     img.onerror = function () {
       URL.revokeObjectURL(url);
-      showResultError("Не удалось загрузить выбранный файл как изображение.");
+      showResultError(t("imageLoad"));
     };
     img.src = url;
   }
@@ -319,31 +400,26 @@
   function showResultSuccess(payload) {
     els.resultIcon.className = "status-icon ok";
     els.resultIcon.textContent = "✓";
-    els.resultTitle.textContent = "CYRQODE распознан";
-    els.resultText.textContent =
-      "Контрольная сумма (CRC-16) сошлась. Идентификатор распознан; " +
-      "запись в реестре может отсутствовать — это не проверялось.";
+    els.resultTitle.textContent = t("successTitle");
+    els.resultText.textContent = t("successText");
     setResultField(els.resultFields, [
       ["Entity ID", payload.entity_id],
-      ["Запись", registryUrlFor(payload)],
+      [t("record"), registryUrlFor(payload)],
       ["Namespace", payload.namespace],
-      ["Версия профиля", "CM v" + payload.version + " (профиль " + payload.profile_id + ")"],
+      [t("profile"), "CM v" + payload.version + " (" + (currentLang === "en" ? "profile " : currentLang === "ru" ? "профиль " : "профиль ") + payload.profile_id + ")"],
       ["Type hint", payload.type_hint],
     ]);
     clearResultActions();
-    addAction("Открыть запись", registryUrlFor(payload), true);
-    addAction("Сырые данные (JSON)", rawRecordUrlFor(payload), false);
+    addAction(t("openRecord"), registryUrlFor(payload), true);
+    addAction(t("rawData"), rawRecordUrlFor(payload), false);
     showScreen("result");
   }
 
   function showResultPartial() {
     els.resultIcon.className = "status-icon warn";
     els.resultIcon.textContent = "!";
-    els.resultTitle.textContent = "CYRQODE распознан частично";
-    els.resultText.textContent =
-      "Контрольная сумма не сошлась. Возможные причины: CYRQODE не полностью " +
-      "в прицеле, блики, недостаточный контраст печати или движение камеры. " +
-      "Наведите CYRQODE точнее и попробуйте снова.";
+    els.resultTitle.textContent = t("partialTitle");
+    els.resultText.textContent = t("partialText");
     setResultField(els.resultFields, []);
     clearResultActions();
     showScreen("result");
@@ -352,7 +428,7 @@
   function showResultError(text) {
     els.resultIcon.className = "status-icon warn";
     els.resultIcon.textContent = "!";
-    els.resultTitle.textContent = "Не удалось распознать";
+    els.resultTitle.textContent = t("errorTitle");
     els.resultText.textContent = text;
     setResultField(els.resultFields, []);
     clearResultActions();

@@ -1,25 +1,38 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-<title>CYRQODE Circle Mark — сканер (v0.1)</title>
-<meta name="description" content="Сканер физического знака Circle Mark (CYRQODE). Инженерный прототип v0.1." />
+<title>CYRQODE Circle Mark — Scanner (v0.1)</title>
+<meta name="description" content="Scan a CYRQODE Circle Mark. Version 0.1." />
 <meta name="color-scheme" content="light dark" />
-<link rel="stylesheet" href="scan.css?v=2" />
+<link rel="stylesheet" href="scan.css?v=3" />
+<meta name="robots" content="noindex, nofollow">
+<script>
+(function () {
+  var lang = 'en';
+  try {
+    var saved = localStorage.getItem('bizdnaii_site_lang');
+    if (['en', 'ru', 'kz'].indexOf(saved) !== -1) lang = saved;
+  } catch (e) {}
+  document.documentElement.lang = lang;
+  document.documentElement.setAttribute('data-lang', lang);
+})();
+</script>
 </head>
 <body>
 <div id="app">
+  <button id="language-toggle" class="language-toggle" type="button" aria-label="Change language">EN</button>
 
   <!-- ==================== стартовый экран ==================== -->
   <section id="screen-start" class="screen active">
     <p class="brand-title">CYRQODE · Circle Mark</p>
-    <button id="btn-start-scan" class="scan-btn" type="button" aria-label="Сканировать">
+    <button id="btn-start-scan" class="scan-btn" type="button" aria-label="Scan">
       <img src="assets/cyrqode-symbol.png" alt="" />
     </button>
-    <div class="scan-btn-label">Сканировать</div>
+    <div class="scan-btn-label"><span class="lang-en">Scan</span><span class="lang-ru">Сканировать</span><span class="lang-kz">Сканерлеу</span></div>
     <div class="file-fallback">
-      <button id="btn-pick-photo" class="secondary-link" type="button">Загрузить фото CYRQODE из файла</button>
+      <button id="btn-pick-photo" class="secondary-link" type="button"><span class="lang-en">Choose a CYRQODE photo</span><span class="lang-ru">Загрузить фото CYRQODE из файла</span><span class="lang-kz">CYRQODE фотосын файлдан таңдау</span></button>
       <input id="file-input" type="file" accept="image/*" capture="environment" />
     </div>
   </section>
@@ -31,27 +44,28 @@
     <div class="camera-overlay">
       <div class="crosshair" id="crosshair"></div>
     </div>
-    <div class="camera-status" id="camera-status">Наведите CYRQODE в прицел</div>
-    <p class="footer-note">Версия 0.1. Наведите CYRQODE в прицел — автоматический поиск в кадре появится позже.</p>
+    <div class="camera-status" id="camera-status">Point CYRQODE at the target</div>
+    <p class="footer-note"><span class="lang-en">Version 0.1. Point CYRQODE at the target; automatic frame search will be added later.</span><span class="lang-ru">Версия 0.1. Наведите CYRQODE в прицел — автоматический поиск в кадре появится позже.</span><span class="lang-kz">0.1-нұсқа. CYRQODE белгісін көздеу шеңберіне бағыттаңыз. Кадрдан автоматты іздеу кейін қосылады.</span></p>
     <div class="camera-controls">
-      <button id="btn-camera-back" class="round-btn" type="button" aria-label="Назад">←</button>
-      <button id="btn-camera-file" class="pill-btn" type="button">Фото из файла</button>
+      <button id="btn-camera-back" class="round-btn" type="button" aria-label="Back">←</button>
+      <button id="btn-camera-file" class="pill-btn" type="button"><span class="lang-en">Choose photo</span><span class="lang-ru">Фото из файла</span><span class="lang-kz">Файлдан фото таңдау</span></button>
     </div>
   </section>
 
   <!-- ==================== экран "камера недоступна" ==================== -->
   <section id="screen-error" class="screen">
     <div class="status-icon warn">⚠</div>
-    <h1 class="result-title">Камера недоступна</h1>
+    <h1 class="result-title"><span class="lang-en">Camera unavailable</span><span class="lang-ru">Камера недоступна</span><span class="lang-kz">Камера қолжетімсіз</span></h1>
     <p class="result-text" id="error-text">
-      Не удалось получить доступ к камере в этом окне (частый случай — приложение
-      открыло ссылку во встроенном просмотрщике без разрешения на камеру).
+      <span class="lang-en">Could not access the camera in this window. This often happens when a messaging app opens the link in its built-in browser without camera permission.</span>
+      <span class="lang-ru">Не удалось получить доступ к камере в этом окне (частый случай — приложение открыло ссылку во встроенном просмотрщике без разрешения на камеру).</span>
+      <span class="lang-kz">Бұл терезеде камераға қол жеткізу мүмкін болмады. Мұндай жағдай мессенджер сілтемені камераға рұқсат бермейтін кіріктірілген шолғышта ашқанда жиі кездеседі.</span>
     </p>
     <div class="btn-row">
-      <a id="btn-open-browser" class="primary-btn" href="#" target="_blank" rel="noopener">Открыть в браузере</a>
-      <button id="btn-error-file" class="ghost-btn" type="button">Загрузить фото из файла</button>
+      <a id="btn-open-browser" class="primary-btn" href="#" target="_blank" rel="noopener"><span class="lang-en">Open in browser</span><span class="lang-ru">Открыть в браузере</span><span class="lang-kz">Браузерде ашу</span></a>
+      <button id="btn-error-file" class="ghost-btn" type="button"><span class="lang-en">Choose a photo</span><span class="lang-ru">Загрузить фото из файла</span><span class="lang-kz">Файлдан фото таңдау</span></button>
     </div>
-    <button id="btn-error-back" class="secondary-link" type="button">Назад</button>
+    <button id="btn-error-back" class="secondary-link" type="button"><span class="lang-en">Back</span><span class="lang-ru">Назад</span><span class="lang-kz">Артқа</span></button>
   </section>
 
   <!-- ==================== экран результата ==================== -->
@@ -61,15 +75,15 @@
     <p class="result-text" id="result-text"></p>
     <div class="result-fields" id="result-fields" hidden></div>
     <div class="btn-row" id="result-actions"></div>
-    <button id="btn-result-back" class="secondary-link" type="button">Сканировать ещё раз</button>
+    <button id="btn-result-back" class="secondary-link" type="button"><span class="lang-en">Scan again</span><span class="lang-ru">Сканировать ещё раз</span><span class="lang-kz">Қайта сканерлеу</span></button>
   </section>
 
   <p class="footer-note" id="global-footer">
-    Версия 0.1. Наведите CYRQODE в прицел — автоматический поиск в кадре появится позже.
+    <span class="lang-en">Version 0.1. Point CYRQODE at the target; automatic frame search will be added later.</span><span class="lang-ru">Версия 0.1. Наведите CYRQODE в прицел — автоматический поиск в кадре появится позже.</span><span class="lang-kz">0.1-нұсқа. CYRQODE белгісін көздеу шеңберіне бағыттаңыз. Кадрдан автоматты іздеу кейін қосылады.</span>
   </p>
 </div>
 
 <script src="cm-scan-core.js?v=2"></script>
-<script src="scan.js?v=2"></script>
+<script src="scan.js?v=3"></script>
 </body>
 </html>
