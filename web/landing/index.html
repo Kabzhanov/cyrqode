@@ -1,12 +1,26 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CYRQODE — метка, по которой можно доказать, что было на самом деле</title>
-<meta name="description" content="CYRQODE: один знак на предмете — и за ним вся история: из чего сделано, кем, на каком оборудовании, по чьему допуску. Открытый протокол, рабочий сканер и генератор знака.">
+<title>CYRQODE — a mark you can use to prove what really happened</title>
+<meta name="description" content="CYRQODE: one mark on a product — and behind it the whole story: what it is made of, who made it, on which equipment, under whose approval. Open protocol, working scanner and mark generator.">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="/cyrqode/assets/cyrqode-symbol.png">
+<!-- Ранняя короткая синхронизация языка: ДО CSS, чтобы первый
+     отрисованный кадр сразу был на сохранённом языке (fallback — en),
+     без «мигания» русского текста. Полный скрипт внизу страницы. -->
+<script>
+(function () {
+  var ORDER = ['en', 'ru', 'kz'];
+  var v = null;
+  try { v = localStorage.getItem('bizdnaii_site_lang'); } catch (e) { v = null; }
+  var lang = ORDER.indexOf(v) > -1 ? v : 'en';
+  var el = document.documentElement;
+  el.setAttribute('lang', lang);
+  el.setAttribute('data-lang', lang);
+})();
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 /* Палитра и приёмы — с главной bizdnai.com (/var/www/bizdnai.com/index.html):
@@ -55,9 +69,20 @@ canvas#neural-bg {
     /* Никакой анимации и фильтров: сканер читает контраст, а не цвет,
        и лишний blur/тень над знаком ломали бы геометрию. */
 }
-/* Круг в картинке по центру кадра при кропе 4:5 — сдвигаем вниз от
-   44.2% (центр картинки) к 50% (центр видимой области). */
-@media (max-width:767px) { .hero > .hero-mark { top:50%; } }
+/* На узком экране кадр 4:5 с object-fit:cover режет ТОЛЬКО бока: при
+   пропорциях 1916x821 картинка влезает по высоте целиком. Значит круг
+   остаётся на своих 44.2% высоты, и вертикальную поправку делать не нужно —
+   прежний сдвиг к 50% опускал знак примерно на 6% высоты кадра. */
+
+/* Переключатель языка: ТОЛЬКО позиционирование. Внешний вид целиком задан
+   классами главной (text-lg text-white hover:text-[#00D4FF] neon-glow
+   px-4 py-2 rounded), самодельной рамки/фона здесь больше нет.
+   Стоит в правом верхнем углу поверх первого экрана и НЕ перекрывает
+   круг со знаком (он по центру кадра на 44.2% высоты). */
+.lang-switch {
+    position:fixed; top:.75rem; right:.75rem; z-index:40;
+    cursor:pointer;
+}
 
 /* Карточки модулей: воздух + неоновая обводка. */
 .card {
@@ -73,10 +98,38 @@ canvas#neural-bg {
 .pill.open { background:rgba(0,212,255,.14); color:#7fe3ff; border:1px solid rgba(0,212,255,.4); }
 .pill.shut { background:rgba(216,27,255,.12); color:#e7a6ff; border:1px solid rgba(216,27,255,.4); }
 
+/* ===== Языки: показываем ровно один из трёх, остальные скрыты. =====
+   Те же классы .lang-en/.lang-ru/.lang-kz, что на главной. Язык по
+   умолнию — английский (тот же fallback, что в раннем скрипте
+   синхронизации выше), иначе первый кадр мигнул бы русским текстом.
+   Правила с префиксом html[data-lang=...] перекрывают и .pill,
+   поэтому у пилюль та же схема, только display:inline-block. */
+.lang-ru, .lang-kz { display:none; }
+.lang-en { display:inline; }
+
+html[data-lang="ru"] .lang-ru { display:inline; }
+html[data-lang="ru"] .lang-en,
+html[data-lang="ru"] .lang-kz { display:none; }
+
+html[data-lang="kz"] .lang-kz { display:inline; }
+html[data-lang="kz"] .lang-en,
+html[data-lang="kz"] .lang-ru { display:none; }
+
+/* Пилюли внутри .pill: display должен остаться inline-block. */
+html[data-lang="en"] .pill.lang-en { display:inline-block; }
+html[data-lang="en"] .pill.lang-ru,
+html[data-lang="en"] .pill.lang-kz { display:none; }
+html[data-lang="ru"] .pill.lang-ru { display:inline-block; }
+html[data-lang="ru"] .pill.lang-en,
+html[data-lang="ru"] .pill.lang-kz { display:none; }
+html[data-lang="kz"] .pill.lang-kz { display:inline-block; }
+html[data-lang="kz"] .pill.lang-en,
+html[data-lang="kz"] .pill.lang-ru { display:none; }
+
 code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.8em;
        background:rgba(0,212,255,.08); padding:.1em .35em; border-radius:4px;
        overflow-wrap:anywhere; }
-/* Внутри <pre> код не должен переноситься и не долженexpand'ить полосу:
+/* Внутри <pre> код не должен переноситься и не должен расширять полосу:
    иначе длинная строка git clone выталкивала страницу по горизонтали. */
 pre { max-width:100%; overflow-x:auto; }
 pre code { background:none; padding:0; border-radius:0; white-space:pre; }
@@ -89,9 +142,17 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
     .card { padding:1.1rem; border-radius:14px; }
 }
 </style>
+    <link rel="canonical" href="https://bizdnai.com/cyrqode/">
 </head>
-<body>
-<canvas id="neural-bg" data-neural-lite="1"></canvas>
+<body data-lang="en">
+<canvas id="neural-bg" data-neural-lite="1"
+        data-neural-dot-radius="2.5" data-neural-dot-color="#33FEFF"
+        data-neural-line-width="2" data-neural-line-alpha="0.363"></canvas>
+
+<button type="button" id="cyrqode-lang-switch"
+        class="lang-switch text-lg text-white hover:text-[#00D4FF] neon-glow px-4 py-2 rounded"
+        title="Switch language / Сменить язык / Тілді ауыстыру"
+        aria-label="Switch language">EN</button>
 
 <div class="page">
 
@@ -99,12 +160,16 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
 <header class="relative">
   <div class="hero">
     <img class="hero-bg" src="/cyrqode/assets/cyrqode-hero.webp" width="1916" height="821"
-         alt="CYRQODE: метка на предмете и вся история предмета за ней"
+         alt="CYRQODE: a mark on a product and the whole story behind it"
+         data-alt-ru="CYRQODE: белгі затта, ал оның артында сол заттың бүкіл тарихы"
+         data-alt-kz="CYRQODE: өнімдегі белгі және оның артындағы толық тарих"
          fetchpriority="high" decoding="async">
     <!-- Настоящий Circle Mark, отрендеренный генератором: Рождение технологии,
          0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70. Открывается сканером. -->
     <img class="hero-mark" src="/cyrqode/assets/cyrqode-hero-mark.svg" width="1000" height="1000"
-         alt="Метка CYRQODE: запись о рождении технологии, 6 сентября 2026">
+         alt="CYRQODE mark: the birth-of-technology record, 6 September 2026"
+         data-alt-ru="Метка CYRQODE: запись о рождении технологии, 6 сентября 2026"
+         data-alt-kz="CYRQODE белгісі: технологияның туылуы жазбасы, 2026 жылғы 6 қыркүйек">
   </div>
 
   <!-- Затемнение нижней кромки hero: заголовок стоит поверх картинки, и
@@ -115,24 +180,31 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
     <div class="pointer-events-none absolute inset-x-0 -top-24 sm:-top-28 bottom-0
                 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/85 to-transparent"></div>
     <h1 class="relative text-3xl sm:text-5xl font-bold leading-tight drop-shadow-[0_2px_18px_rgba(0,0,0,.9)]">
-      Метка, по которой можно доказать, что было на самом деле
+      <span class="lang-en">A mark you can use to prove what really happened</span>
+      <span class="lang-ru">Метка, по которой можно доказать, что было на самом деле</span>
+      <span class="lang-kz">Шындығында не болғанын дәлелдейтін белгі</span>
     </h1>
     <p class="relative mt-5 text-base sm:text-lg text-gray-300 max-w-3xl">
-      Один знак на предмете — и за ним вся история: из чего сделано, кем, на каком
-      оборудовании, по чьему допуску, с какими документами. Не «строка в базе», а
-      цепочка неизменяемых событий, каждое со ссылкой на свою причину.
+      <span class="lang-en">One mark on a product — and behind it the whole story: what it is made of, who made it, on which equipment, under whose approval, with which documents. Not a “row in a database”, but a chain of immutable events, each one linked to its own cause.</span>
+      <span class="lang-ru">Один знак на предмете — и за ним вся история: из чего сделано, кем, на каком оборудовании, по чьему допуску, с какими документами. Не «строка в базе», а цепочка неизменяемых событий, каждое со ссылкой на свою причину.</span>
+      <span class="lang-kz">Өнімге бір белгі — ал оның артында толық тарих: неден жасалған, кім жасаған, қандай жабдықта, кімнің рұқсатымен, қандай құжаттармен. «Дерекқордағы жол» емес — өзгермейтін оқиғалар тізбегі, әрқайсысының өз себебі бар.</span>
     </p>
     <div class="relative mt-7 flex flex-col sm:flex-row gap-3">
       <a href="/cyrqode/scan/" class="cta-button neon-glow bg-[#00D4FF] text-black font-semibold px-6 py-3 rounded-lg text-center">
-        Прочитать циркод
+        <span class="lang-en">Read a mark</span>
+        <span class="lang-ru">Прочитать циркод</span>
+        <span class="lang-kz">Метканы оқу</span>
       </a>
       <a href="/cyrqode/make/" class="cta-button neon-edge px-6 py-3 rounded-lg text-center text-[#00D4FF] font-semibold">
-        Создать циркод
+        <span class="lang-en">Create a mark</span>
+        <span class="lang-ru">Создать циркод</span>
+        <span class="lang-kz">Метка жасау</span>
       </a>
     </div>
     <p class="relative mt-4 text-sm text-gray-400">
-      Наведите камеру телефона на метку в картинке выше — это настоящий знак,
-      а не рисунок. Сканер работает в браузере и ничего не отправляет наружу.
+      <span class="lang-en">Point your phone camera at the mark in the picture above — it is a real mark, not artwork. The scanner runs in the browser and sends nothing outside your device.</span>
+      <span class="lang-ru">Наведите камеру телефона на метку в картинке выше — это настоящий знак, а не рисунок. Сканер работает в браузере и ничего не отправляет наружу.</span>
+      <span class="lang-kz">Жоғарыдағы суреттегі белгіге телефон камерасын бағыттаңыз — бұл шынайы белгі, сурет емес. Сканер браузерде жұмыс істейді және сыртқа ештеңе жібермейді.</span>
     </p>
   </div>
 </header>
@@ -141,65 +213,109 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
 
   <!-- ============ СУТЬ ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">Зачем это нужно</h2>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">
+      <span class="lang-en">Why this is needed</span>
+      <span class="lang-ru">Зачем это нужно</span>
+      <span class="lang-kz">Бұл неге керек</span>
+    </h2>
     <p class="text-gray-300 mb-3">
-      Любая система учёта отвечает на вопрос «что записано». CYRQODE отвечает на
-      другой: <strong class="text-white">что произошло, в какой связи с остальным,
-      по чьим полномочиям и можно ли это доказать через год.</strong>
+      <span class="lang-en">Every accounting system answers the question “what is recorded”. CYRQODE answers a different one: <strong class="text-white">what happened, in what relation to everything else, under whose authority, and whether it can be proven a year from now.</strong></span>
+      <span class="lang-ru">Любая система учёта отвечает на вопрос «что записано». CYRQODE отвечает на другой: <strong class="text-white">что произошло, в какой связи с остальным, по чьим полномочиям и можно ли это доказать через год.</strong></span>
+      <span class="lang-kz">Кез келген есеп жүйесі «не жазылған» деген сұраққа жауап береді. CYRQODE басқа сұраққа жауап береді: <strong class="text-white">не болды, қалғанымен қандай байланыста, кімнің өкілетімен және бір жылдан кейін оны дәлелдей аласыз ба.</strong></span>
     </p>
     <div class="grid sm:grid-cols-2 gap-3 text-sm">
       <div class="neon-edge rounded-xl p-3">
-        <div class="text-[#00D4FF] font-semibold mb-1">Производителю</div>
-        <p class="text-gray-400">Доказуемая история партии: из каких входных партий, на каком
-        оборудовании, оператором с действующим допуском, по какой ревизии техкарты.
-        При споре это разница между словом и доказательством.</p>
+        <div class="text-[#00D4FF] font-semibold mb-1">
+          <span class="lang-en">For the manufacturer</span>
+          <span class="lang-ru">Производителю</span>
+          <span class="lang-kz">Өндірушіге</span>
+        </div>
+        <p class="text-gray-400">
+          <span class="lang-en">A provable history of a batch: which input batches, which equipment, which operator with a valid permit, which revision of the process sheet. In a dispute that is the difference between a claim and proof.</span>
+          <span class="lang-ru">Доказуемая история партии: из каких входных партий, на каком оборудовании, оператором с действующим допуском, по какой ревизии техкарты. При споре это разница между словом и доказательством.</span>
+          <span class="lang-kz">Партияның дәлелденетін тарихы: қандай шикізат партияларынан, қандай жабдықта, жарамды рұқсаты бар қай оператордың қатысуымен және технологиялық картаның қай нұсқасы бойынша өндірілгені. Дау кезінде бұл жай мәлімдеме мен дәлелдің айырмашылығы.</span>
+        </p>
       </div>
       <div class="neon-edge rounded-xl p-3">
-        <div class="text-[#00D4FF] font-semibold mb-1">Покупателю</div>
-        <p class="text-gray-400">Один скан вместо доверия к этикетке: что за продукт, кто
-        сделал, когда, что внутри. Без приложения, без регистрации, без слежки.</p>
+        <div class="text-[#00D4FF] font-semibold mb-1">
+          <span class="lang-en">For the buyer</span>
+          <span class="lang-ru">Покупателю</span>
+          <span class="lang-kz">Сатып алушыға</span>
+        </div>
+        <p class="text-gray-400">
+          <span class="lang-en">One scan instead of trusting the label: what the product is, who made it, when, what is inside. No app, no registration, no tracking.</span>
+          <span class="lang-ru">Один скан вместо доверия к этикетке: что за продукт, кто сделал, когда, что внутри. Без приложения, без регистрации, без слежки.</span>
+          <span class="lang-kz">Белгіге сенудің орнына бір скан: өнім қандай, кім жасаған, қашан, ішінде не бар. Қолданба жоқ, тіркелу жоқ, жіберілетін деректер жоқ.</span>
+        </p>
       </div>
       <div class="neon-edge rounded-xl p-3">
-        <div class="text-[#00D4FF] font-semibold mb-1">Разработчику</div>
-        <p class="text-gray-400">Открытый протокол вместо чужого чёрного ящика: формат,
-        канонизация, подпись, тестовые векторы и рабочий сканер. Свой генератор,
-        свой сканер, свой журнал — реализуемо без нашего участия.</p>
+        <div class="text-[#00D4FF] font-semibold mb-1">
+          <span class="lang-en">For the developer</span>
+          <span class="lang-ru">Разработчику</span>
+          <span class="lang-kz">Әзірлеушіге</span>
+        </div>
+        <p class="text-gray-400">
+          <span class="lang-en">An open protocol instead of someone else's black box: format, canonicalization, signature, test vectors and a working scanner. Your own generator, your own scanner, your own ledger — implementable without us.</span>
+          <span class="lang-ru">Открытый протокол вместо чужого чёрного ящика: формат, канонизация, подпись, тестовые векторы и рабочий сканер. Свой генератор, свой сканер, свой журнал — реализуемо без нашего участия.</span>
+          <span class="lang-kz">Біреудің қара жәшігі орнына ашық протокол: пішім, канондау, қолтаңба, тест векторлары және жұмыс істейтін сканер. Өз генераторыңыз, өз сканеріңіз, өз журналыңыз — біздің қатысусыз іске асырылады.</span>
+        </p>
       </div>
       <div class="neon-edge rounded-xl p-3">
-        <div class="text-[#00D4FF] font-semibold mb-1">Интегратору</div>
-        <p class="text-gray-400">Идентичность, переживающая носители: метка отклеилась,
-        карту заменили — идентификатор прежний, история не рвётся, замена
-        фиксируется отдельным событием.</p>
+        <div class="text-[#00D4FF] font-semibold mb-1">
+          <span class="lang-en">For the integrator</span>
+          <span class="lang-ru">Интегратору</span>
+          <span class="lang-kz">Интеграторға</span>
+        </div>
+        <p class="text-gray-400">
+          <span class="lang-en">An identity that outlives its carriers: the label came off, the card was replaced — the identifier stays the same, the history is not torn, the replacement is recorded as a separate event.</span>
+          <span class="lang-ru">Идентичность, переживающая носители: белгі отклеилась, карту заменили — идентификатор прежний, история не рвётся, замена фиксируется отдельным событием.</span>
+          <span class="lang-kz">Тасымалдағышы ауысып кетсе де сақталатын идентификация: белгі алынып тасталды, карта ауыстырылды — идентификатор өзгермейді, тарих үзілмейді, алмасу жеке оқиға ретінде тіркеледі.</span>
+        </p>
       </div>
     </div>
     <p class="mt-3 text-sm text-gray-400">
-      Ключевое отличие от блокчейн-решений: <strong class="text-white">никакого токена,
-      никакой обязательной распределённой сети.</strong> Сервис работает сам по себе,
-      внешние свидетельства подключаются позже, когда и если они нужны.
+      <span class="lang-en">The key difference from blockchain solutions: <strong class="text-white">no token, no mandatory distributed network.</strong> The service works on its own; external witnesses can be attached later, when and if they are needed.</span>
+      <span class="lang-ru">Ключевое отличие от блокчейн-решений: <strong class="text-white">никакого токена, никакой обязательной распределённой сети.</strong> Сервис работает сам по себе, внешние свидетельства подключаются позже, когда и если они нужны.</span>
+      <span class="lang-kz">Блокчейн шешімдерінен негізгі айырмашылық: <strong class="text-white">токен жоқ, міндетті таратылған желі жоқ.</strong> Қызмет өзі жұмыс істейді, сыртқы куәгерлер тек кейін, қажет болса қосылады.</span>
     </p>
   </section>
 
   <!-- ============ ПРОЧИТАТЬ ЗНАК ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">Прочитать знак</h2>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">
+      <span class="lang-en">Read a mark</span>
+      <span class="lang-ru">Прочитать знак</span>
+      <span class="lang-kz">Метканы оқу</span>
+    </h2>
     <div class="flex flex-col sm:flex-row items-center gap-6">
       <div class="shrink-0">
         <div class="scan-target neon-glow">
           <img src="/cyrqode/assets/cyrqode-hero-mark.svg" width="220" height="220" loading="lazy" decoding="async"
-               alt="Метка CYRQODE крупным планом — наведите на неё камеру">
+               alt="CYRQODE mark close-up — point your camera at it"
+               data-alt-ru="Метка CYRQODE крупным планом — наведите на неё камеру"
+               data-alt-kz="CYRQODE белгісі жақыннан — камераны осыға бағыттаңыз">
         </div>
       </div>
       <div class="text-sm text-gray-300">
-        <p class="mb-3">Откройте сканер и наведите камеру на метку. Откроется запись
-        реестра — то, что технология действительно доказала.</p>
-        <p class="mb-3">Кадры с камеры остаются на устройстве: сканер ничего не
-        отправляет наружу.</p>
-        <p class="text-gray-400 mb-4">Версия 0.1: метку нужно навести в прицел,
-        автоматический поиск в кадре появится позже. Если камера не открывается
-        (частый случай внутри мессенджеров), сканер предложит открыть себя в
-        браузере или распознать метку по снимку из файла.</p>
+        <p class="mb-3">
+          <span class="lang-en">Open the scanner and point the camera at the mark. A registry record will open — what the technology actually proved.</span>
+          <span class="lang-ru">Откройте сканер и наведите камеру на метку. Откроется запись реестра — то, что технология действительно доказала.</span>
+          <span class="lang-kz">Сканерді ашып камераны белгіге бағыттаңыз. Реестр жазбасы ашылады — технология шынымен не дәлелдегені.</span>
+        </p>
+        <p class="mb-3">
+          <span class="lang-en">Camera frames stay on your device: the scanner sends nothing outside.</span>
+          <span class="lang-ru">Кадры с камеры остаются на устройстве: сканер ничего не отправляет наружу.</span>
+          <span class="lang-kz">Камера кадрлары құрылғыңызда қалады: сканер сыртқа ештеңе жібермейді.</span>
+        </p>
+        <p class="text-gray-400 mb-4">
+          <span class="lang-en">Version 0.1: you have to aim at the mark, automatic search within the frame will come later. If the camera does not open (common inside messengers), the scanner will offer to open itself in a browser or to recognize the mark from a file snapshot.</span>
+          <span class="lang-ru">Версия 0.1: метку нужно навести в прицел, автоматический поиск в кадре появится позже. Если камера не открывается (частый случай внутри мессенджеров), сканер предложит открыть себя в браузере или распознать метку по снимку из файла.</span>
+          <span class="lang-kz">Нұсқа 0.1: белгіны прицелге түйіру керек, кадр ішіндегі автоматты іздеу кейін пайда болады. Камера ашылмаса (мессенджерлер ішінде бұл жиі кездеседі), сканер браузерде ашылуды немесе файл суретінен белгіны тануды ұсынады.</span>
+        </p>
         <a href="/cyrqode/scan/" class="cta-button neon-glow bg-[#00D4FF] text-black font-semibold px-5 py-2.5 rounded-lg inline-block">
-          Открыть сканер
+          <span class="lang-en">Open the scanner</span>
+          <span class="lang-ru">Открыть сканер</span>
+          <span class="lang-kz">Сканерді ашу</span>
         </a>
       </div>
     </div>
@@ -207,101 +323,192 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
 
   <!-- ============ СОЗДАТЬ ЗНАК ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">Создать знак</h2>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">
+      <span class="lang-en">Create a mark</span>
+      <span class="lang-ru">Создать знак</span>
+      <span class="lang-kz">Метка жасау</span>
+    </h2>
     <p class="text-gray-300 text-sm mb-3">
-      Знак кодирует ровно один идентификатор сущности — UUID — и служебные поля
-      профиля. Вставьте идентификатор и получите готовую векторную метку для
-      печати или экрана.
+      <span class="lang-en">A mark encodes exactly one entity identifier — a UUID — plus the service fields of the profile. Enter the identifier and you get a ready vector mark for print or screen.</span>
+      <span class="lang-ru">Знак кодирует ровно один идентификатор сущности — UUID — и служебные поля профиля. Вставьте идентификатор и получите готовую векторную метку для печати или экрана.</span>
+      <span class="lang-kz">Метка дәл бір нысан идентификаторын — UUID — және профильдің қызметтік өрістерін кодтайды. Идентификаторды енгізіңіз — басып шығаруға да экранға дайын векторлық белгі аласыз.</span>
     </p>
     <p class="text-gray-400 text-sm mb-4">
-      Прямой запрет спецификации: имя, дата, автор, владелец, цена, рейтинг,
-      местоположение, статус, срок годности, роль сотрудника, любой текст или URL.
-      Причина не в экономии места. Всё перечисленное меняется, а метка — нет.
-      Если зашить срок годности в знак, то при пересортировке партии придётся
-      перепечатывать физические носители.
+      <span class="lang-en">A direct prohibition by the specification: name, date, author, owner, price, rating, location, status, expiry date, employee role, any text or URL. The reason is not to save space. All of that changes, the mark does not. If you bake an expiry date into the mark, then every re-sorting of a batch means reprinting the physical carriers.</span>
+      <span class="lang-ru">Прямой запрет спецификации: имя, дата, автор, владелец, цена, рейтинг, местоположение, статус, срок годности, роль сотрудника, любой текст или URL. Причина не в экономии места. Всё перечисленное меняется, а белгі — нет. Если зашить срок годности в знак, то при пересортировке партии придётся перепечатывать физические носители.</span>
+      <span class="lang-kz">Спецификация бойынша мыналарды белгіге енгізуге тыйым салынады: атау, күн, автор, иесі, баға, рейтинг, орын, мәртебе, жарамдылық мерзімі, қызметкердің рөлі, кез келген мәтін не URL. Себебі орын үнемдеу емес: бұлардың бәрі өзгеруі мүмкін, ал белгі өзгермейді. Жарамдылық мерзімін белгіге енгізсеңіз, партия қайта сұрыпталған сайын физикалық тасымалдағыштарды қайта басып шығару керек болады.</span>
     </p>
     <a href="/cyrqode/make/" class="cta-button neon-edge px-5 py-2.5 rounded-lg inline-block text-[#00D4FF] font-semibold text-sm">
-      Открыть генератор
+      <span class="lang-en">Open the generator</span>
+      <span class="lang-ru">Открыть генератор</span>
+      <span class="lang-kz">Генераторды ашу</span>
     </a>
   </section>
 
   <!-- ============ ПРИМЕРЫ ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-1">Примеры из репозитория</h2>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-1">
+      <span class="lang-en">Examples from the repository</span>
+      <span class="lang-ru">Примеры из репозитория</span>
+      <span class="lang-kz">Репозиторийден үлгілер</span>
+    </h2>
     <p class="text-sm text-gray-400 mb-5">
-      Записи реестра демонстрационные: продукты и компании вымышлены. Реальные
-      записи клиентов живут в базе сервиса и на эту страницу не попадают.
+      <span class="lang-en">The registry records here are for demonstration: the products and companies are fictitious. Real customer records live in the service database and never reach this page.</span>
+      <span class="lang-ru">Записи реестра демонстрационные: продукты и компании вымышлены. Реальные записи клиентов живут в базе сервиса и на эту страницу не попадают.</span>
+      <span class="lang-kz">Реестр жазбалары көрсеткіш үшін: өнімдер мен компаниялар ойдан шығарылған. Нақты клиент жазбалары қызмет базасында сақталады және бұл бетке түспейді.</span>
     </p>
 
     <!-- Основной сюжет: прослеживаемость партии -->
     <div class="neon-edge rounded-2xl p-4 sm:p-5 mb-4">
       <div class="flex items-center gap-2 mb-3">
-        <span class="pill open">основной пример</span>
-        <h3 class="font-semibold text-white">Прослеживаемость партии: два знака на одной упаковке</h3>
+        <span class="pill open lang-en">main example</span>
+        <span class="pill open lang-ru">основной пример</span>
+        <span class="pill open lang-kz">негізгі үлгі</span>
+        <h3 class="font-semibold text-white">
+          <span class="lang-en">Batch traceability: two marks on one package</span>
+          <span class="lang-ru">Прослеживаемость партии: два знака на одной упаковке</span>
+          <span class="lang-kz">Партияның қадағалануы: бір қаптамада екі белгі</span>
+        </h3>
       </div>
       <p class="text-sm text-gray-300 mb-4">
-        Это <strong class="text-white">разные сущности</strong>, и генерируются они при
-        разных обстоятельствах. Путать их нельзя: от этого зависит, что вообще можно
-        напечатать.
+        <span class="lang-en">These are <strong class="text-white">different entities</strong>, and they are generated under different circumstances. They must not be confused: what can be printed at all depends on it.</span>
+        <span class="lang-ru">Это <strong class="text-white">разные сущности</strong>, и генерируются они при разных обстоятельствах. Путать их нельзя: от этого зависит, что вообще можно напечатать.</span>
+        <span class="lang-kz">Бұл — <strong class="text-white">әртүрлі нысандар</strong>, олар түрлі жағдайда жасалады. Оларды шатастыруға болмайды: не басып шығарылатыны соған байланысты.</span>
       </p>
       <div class="overflow-x-auto -mx-1 px-1">
         <table class="w-full text-xs sm:text-sm min-w-[520px]">
           <thead>
             <tr class="text-[#00D4FF] text-left border-b border-white/10">
               <th class="py-2 pr-3 font-semibold"></th>
-              <th class="py-2 pr-3 font-semibold">Знак продукта</th>
-              <th class="py-2 font-semibold">Знак партии</th>
+              <th class="py-2 pr-3 font-semibold">
+                <span class="lang-en">Product mark</span>
+                <span class="lang-ru">Знак продукта</span>
+                <span class="lang-kz">Өнім белгісі</span>
+              </th>
+              <th class="py-2 font-semibold">
+                <span class="lang-en">Batch mark</span>
+                <span class="lang-ru">Знак партии</span>
+                <span class="lang-kz">Партия белгісі</span>
+              </th>
             </tr>
           </thead>
           <tbody class="text-gray-300">
             <tr class="border-b border-white/5">
-              <td class="py-2 pr-3 text-gray-400">Что обозначает</td>
-              <td class="py-2 pr-3">SKU: «Молоко от бабули» вообще</td>
-              <td class="py-2">конкретный выпуск L2609-06</td>
+              <td class="py-2 pr-3 text-gray-400">
+                <span class="lang-en">What it denotes</span>
+                <span class="lang-ru">Что обозначает</span>
+                <span class="lang-kz">Нені білдіреді</span>
+              </td>
+              <td class="py-2 pr-3">
+                <span class="lang-en">SKU “Grandma's Milk” in general</span>
+                <span class="lang-ru">SKU: «Молоко от бабули» вообще</span>
+                <span class="lang-kz">SKU: «Әже сүті» — жалпы</span>
+              </td>
+              <td class="py-2">
+                <span class="lang-en">a specific L2609-06 release</span>
+                <span class="lang-ru">конкретный выпуск L2609-06</span>
+                <span class="lang-kz">нақты L2609-06 шығарылымы</span>
+              </td>
             </tr>
             <tr class="border-b border-white/5">
-              <td class="py-2 pr-3 text-gray-400">Когда создаётся</td>
-              <td class="py-2 pr-3">один раз, при заведении продукта</td>
-              <td class="py-2">при выпуске каждой партии</td>
+              <td class="py-2 pr-3 text-gray-400">
+                <span class="lang-en">When it is created</span>
+                <span class="lang-ru">Когда создаётся</span>
+                <span class="lang-kz">Қашан жасалады</span>
+              </td>
+              <td class="py-2 pr-3">
+                <span class="lang-en">once, when the product is registered</span>
+                <span class="lang-ru">один раз, при заведении продукта</span>
+                <span class="lang-kz">бір рет, өнім енгізілгенде</span>
+              </td>
+              <td class="py-2">
+                <span class="lang-en">for every batch produced</span>
+                <span class="lang-ru">при выпуске каждой партии</span>
+                <span class="lang-kz">әр партия өндірілгенде</span>
+              </td>
             </tr>
             <tr class="border-b border-white/5">
-              <td class="py-2 pr-3 text-gray-400">Как наносится</td>
-              <td class="py-2 pr-3">в макете упаковки, типографская печать</td>
-              <td class="py-2">на линии, тем же способом, что и дата розлива</td>
+              <td class="py-2 pr-3 text-gray-400">
+                <span class="lang-en">How it is applied</span>
+                <span class="lang-ru">Как наносится</span>
+                <span class="lang-kz">Қалай жағылады</span>
+              </td>
+              <td class="py-2 pr-3">
+                <span class="lang-en">in the packaging layout, offset printing</span>
+                <span class="lang-ru">в макете упаковки, типографская печать</span>
+                <span class="lang-kz">орам макетінде, типографиялық басылым</span>
+              </td>
+              <td class="py-2">
+                <span class="lang-en">on the line, the same way as the filling date</span>
+                <span class="lang-ru">на линии, тем же способом, что и дата розлива</span>
+                <span class="lang-kz">өндіріс желісінде, құйылған күнді басу тәсілімен бірдей әдіспен</span>
+              </td>
             </tr>
             <tr class="border-b border-white/5">
-              <td class="py-2 pr-3 text-gray-400">Как часто меняется</td>
-              <td class="py-2 pr-3">почти никогда</td>
-              <td class="py-2">каждую партию</td>
+              <td class="py-2 pr-3 text-gray-400">
+                <span class="lang-en">How often it changes</span>
+                <span class="lang-ru">Как часто меняется</span>
+                <span class="lang-kz">Қаншалықты өзгереді</span>
+              </td>
+              <td class="py-2 pr-3">
+                <span class="lang-en">almost never</span>
+                <span class="lang-ru">почти никогда</span>
+                <span class="lang-kz">өте сирек өзгереді</span>
+              </td>
+              <td class="py-2">
+                <span class="lang-en">every batch</span>
+                <span class="lang-ru">каждую партию</span>
+                <span class="lang-kz">әр партияда</span>
+              </td>
             </tr>
             <tr>
-              <td class="py-2 pr-3 text-gray-400">Логотип в центре</td>
-              <td class="py-2 pr-3">уместен: печать качественная, размер известен</td>
-              <td class="py-2">не нужен: каплеструйная печать его смажет</td>
+              <td class="py-2 pr-3 text-gray-400">
+                <span class="lang-en">Logo in the center</span>
+                <span class="lang-ru">Логотип в центре</span>
+                <span class="lang-kz">Логотип ортада</span>
+              </td>
+              <td class="py-2 pr-3">
+                <span class="lang-en">appropriate: high-quality print, known size</span>
+                <span class="lang-ru">уместен: печать качественная, размер известен</span>
+                <span class="lang-kz">орны бар: сапалы басылым, өлшемі белгілі</span>
+              </td>
+              <td class="py-2">
+                <span class="lang-en">not needed: inkjet printing would smear it</span>
+                <span class="lang-ru">не нужен: каплеструйная печать его смажет</span>
+                <span class="lang-kz">қажет емес: сия бүріккіш принтерде ол жайылып кетеді</span>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
       <p class="text-sm text-gray-300 mt-4">
-        <strong class="text-white">Знак партии</strong> наносится на ходу — тем же
-        оборудованием, что печатает дату. Разрешение ниже, краска растекается. Поэтому
-        он всегда монохромный, без логотипа, и крупнее по модулю.
+        <span class="lang-en">The <strong class="text-white">batch mark</strong> is applied on the fly — by the same equipment that prints the date. The resolution is lower, the ink spreads. That is why it is always monochrome, without a logo, and larger in module size.</span>
+        <span class="lang-ru"><strong class="text-white">Знак партии</strong> наносится на ходу — тем же оборудованием, что печатает дату. Разрешение ниже, краска растекается. Поэтому он всегда монохромный, без логотипа, и крупнее по модулю.</span>
+        <span class="lang-kz"><strong class="text-white">Партия белгісі</strong> өндіріс барысында күнді басатын жабдықтың өзімен бірге басылады. Басып шығару ажыратымдылығы төмен, сия жайылып кетеді. Сондықтан белгі әрдайым бір түсті, логотипсіз және ірі модульдермен жасалады.</span>
       </p>
       <p class="text-sm text-gray-400 mt-2">
-        Практический вывод: если у производства нет переменной печати, знак партии
-        физически нанести нечем. Тогда на упаковку идёт только знак продукта, а срок
-        годности покупатель читает глазами. Модель это допускает — уровни независимы.
+        <span class="lang-en">The practical conclusion: if production has no variable printing, there is physically no way to apply the batch mark. Then only the product mark goes on the package, and the buyer reads the expiry date with their eyes. The model allows for that — the levels are independent.</span>
+        <span class="lang-ru">Практический вывод: если у производства нет переменной печати, знак партии физически нанести нечем. Тогда на упаковку идёт только знак продукта, а срок годности покупатель читает глазами. Модель это допускает — уровни независимы.</span>
+        <span class="lang-kz">Практикалық қорытынды: өндірісте айнымалы деректерді басып шығару мүмкіндігі болмаса, партия белгісін қаптамаға басу мүмкін емес. Онда қаптамаға тек өнім белгісі басылады, ал сатып алушы жарамдылық мерзімін көзбен оқиды. Модель бұған мүмкіндік береді: деңгейлер бір-бірінен тәуелсіз.</span>
       </p>
       <div class="grid sm:grid-cols-2 gap-3 mt-4">
         <a href="/cyrqode/r/0199a43c-9026-7b57-c1a8-3e4f5a6b7c89/"
            class="neon-edge rounded-xl p-3 hover:border-[#00D4FF] transition-colors">
           <div class="flex items-center gap-3">
             <div class="bg-white rounded-full p-1.5 shrink-0">
-              <img src="/cyrqode/assets/marks/cyrqode-product-mark.svg" width="56" height="56" loading="lazy" decoding="async" alt="Знак продукта">
+              <img src="/cyrqode/assets/marks/cyrqode-product-mark.svg" width="112" height="112" loading="lazy" decoding="async" alt="Product mark" data-alt-ru="Знак продукта" data-alt-kz="Өнім белгісі">
             </div>
             <div class="min-w-0">
-              <div class="text-[#00D4FF] text-sm font-semibold">Знак продукта</div>
-              <div class="text-xs text-gray-400">монохромный, для макета</div>
+              <div class="text-[#00D4FF] text-sm font-semibold">
+                <span class="lang-en">Product mark</span>
+                <span class="lang-ru">Знак продукта</span>
+                <span class="lang-kz">Өнім белгісі</span>
+              </div>
+              <div class="text-xs text-gray-400">
+                <span class="lang-en">monochrome, for the layout</span>
+                <span class="lang-ru">монохромный, для макета</span>
+                <span class="lang-kz">монохром, макет үшін</span>
+              </div>
             </div>
           </div>
         </a>
@@ -309,11 +516,19 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
            class="neon-edge rounded-xl p-3 hover:border-[#00D4FF] transition-colors">
           <div class="flex items-center gap-3">
             <div class="bg-white rounded-full p-1.5 shrink-0">
-              <img src="/cyrqode/assets/marks/cyrqode-milk-batch.svg" width="56" height="56" loading="lazy" decoding="async" alt="Знак партии">
+              <img src="/cyrqode/assets/marks/cyrqode-milk-batch.svg" width="112" height="112" loading="lazy" decoding="async" alt="Batch mark" data-alt-ru="Знак партии" data-alt-kz="Партия белгісі">
             </div>
             <div class="min-w-0">
-              <div class="text-[#00D4FF] text-sm font-semibold">Знак партии L2609-06</div>
-              <div class="text-xs text-gray-400">монохромный, для линии</div>
+              <div class="text-[#00D4FF] text-sm font-semibold">
+                <span class="lang-en">Batch mark L2609-06</span>
+                <span class="lang-ru">Знак партии L2609-06</span>
+                <span class="lang-kz">Партия белгісі L2609-06</span>
+              </div>
+              <div class="text-xs text-gray-400">
+                <span class="lang-en">monochrome, for the line</span>
+                <span class="lang-ru">монохромный, для линии</span>
+                <span class="lang-kz">монохром, сызық үшін</span>
+              </div>
             </div>
           </div>
         </a>
@@ -322,32 +537,52 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
 
     <!-- Что в записи есть -->
     <div class="neon-edge-magenta rounded-2xl p-4 sm:p-5 mb-4">
-      <h3 class="font-semibold text-white mb-3">Что в записи партии есть</h3>
+      <h3 class="font-semibold text-white mb-3">
+        <span class="lang-en">What a batch record contains</span>
+        <span class="lang-ru">Что в записи партии есть</span>
+        <span class="lang-kz">Партия жазбасында не бар</span>
+      </h3>
       <div class="grid sm:grid-cols-2 gap-3 text-sm mb-4">
         <div class="rounded-xl p-3 bg-white/5">
-          <span class="pill open mb-2">Открыто</span>
-          <p class="text-gray-300 mt-1">факт, время, участники в виде идентификаторов,
-          ссылки на доказательства в виде хэшей.</p>
+          <span class="pill open mb-2 lang-en">Open</span>
+          <span class="pill open mb-2 lang-ru">Открыто</span>
+          <span class="pill open mb-2 lang-kz">Ашық</span>
+          <p class="text-gray-300 mt-1">
+            <span class="lang-en">the fact, the time, participants as identifiers, references to evidence as hashes.</span>
+            <span class="lang-ru">факт, время, участники в виде идентификаторов, ссылки на доказательства в виде хэшей.</span>
+            <span class="lang-kz">факт, уақыт, қатысушылар идентификатор түрінде, дәлелге сілтемелер хэш түрінде.</span>
+          </p>
         </div>
         <div class="rounded-xl p-3 bg-white/5">
-          <span class="pill shut mb-2">Не будет</span>
-          <p class="text-gray-300 mt-1">персональных данных, содержимого документов,
-          коммерческих условий.</p>
+          <span class="pill shut mb-2 lang-en">Never</span>
+          <span class="pill shut mb-2 lang-ru">Не будет</span>
+          <span class="pill shut mb-2 lang-kz">Болмайды</span>
+          <p class="text-gray-300 mt-1">
+            <span class="lang-en">personal data, document contents, commercial terms.</span>
+            <span class="lang-ru">персональных данных, содержимого документов, коммерческих условий.</span>
+            <span class="lang-kz">жеке деректер, құжат мазмұны, коммерциялық шарттар.</span>
+          </p>
         </div>
       </div>
       <p class="text-sm text-gray-300 mb-3">
-        Запись доказывает, что документ с точно таким содержимым существовал на
-        указанную дату, <strong class="text-white">не храня сам документ</strong>.
-        Проверить может любой: посчитать SHA-256 своей копии и сравнить с записью.
+        <span class="lang-en">The record proves that a document with exactly such content existed on the stated date, <strong class="text-white">without storing the document itself</strong>. Anyone can check: compute the SHA-256 of their own copy and compare it with the record.</span>
+        <span class="lang-ru">Запись доказывает, что документ с точно таким содержимым существовал на указанную дату, <strong class="text-white">не храня сам документ</strong>. Проверить может любой: посчитать SHA-256 своей копии и сравнить с записью.</span>
+        <span class="lang-kz">Жазба толық осы мазмұндағы құжат көрсетілген күні бар болғанын дәлелдейді, <strong class="text-white">құжаттың өзін сақтамайды</strong>. Кез келген адам тексере алады: өз көшірмесінің SHA-256 хэшін есептеп, жазбамен салыстырыңыз.</span>
       </p>
       <div class="flex flex-wrap gap-2 text-xs">
         <a href="/cyrqode/registry/0199a410-3b72-7c81-9d5e-4a6f2b8c0e13.json"
            class="neon-edge rounded-lg px-3 py-1.5 text-[#00D4FF] hover:border-[#00D4FF] break-all">
-          registry/…e13.json — запись партии
+          registry/…e13.json —
+          <span class="lang-en">batch record</span>
+          <span class="lang-ru">запись партии</span>
+          <span class="lang-kz">партия жазбасы</span>
         </a>
         <a href="/cyrqode/registry/0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70.json"
            class="neon-edge rounded-lg px-3 py-1.5 text-[#00D4FF] hover:border-[#00D4FF] break-all">
-          registry/…a70.json — рождение технологии
+          registry/…a70.json —
+          <span class="lang-en">birth of the technology</span>
+          <span class="lang-ru">рождение технологии</span>
+          <span class="lang-kz">технологияның туылуы</span>
         </a>
       </div>
     </div>
@@ -355,142 +590,226 @@ pre code { background:none; padding:0; border-radius:0; white-space:pre; }
     <!-- Остальные примеры -->
     <div class="grid sm:grid-cols-2 gap-3">
       <div class="neon-edge rounded-xl p-4">
-        <div class="text-[#00D4FF] font-semibold text-sm mb-2">Рождение технологии</div>
-        <p class="text-sm text-gray-400 mb-3">Первая запись журнала: имя, символ и
-        спецификации, зафиксированные 6 сентября 2026 года вместе с отпечатками
-        документов. Это первое, что технология доказала, — собственное начало.</p>
-        <a href="/cyrqode/r/0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70/" class="text-sm text-[#00D4FF] hover:underline">Открыть запись →</a>
+        <div class="text-[#00D4FF] font-semibold text-sm mb-2">
+          <span class="lang-en">Birth of the technology</span>
+          <span class="lang-ru">Рождение технологии</span>
+          <span class="lang-kz">Технологияның туылуы</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-3">
+          <span class="lang-en">The first ledger record: the name, symbol and specifications recorded on 6 September 2026 together with document fingerprints. It is the first thing the technology proved — its own beginning.</span>
+          <span class="lang-ru">Первая запись журнала: имя, символ и спецификации, зафиксированные 6 сентября 2026 года вместе с отпечатками документов. Это первое, что технология доказала, — собственное начало.</span>
+          <span class="lang-kz">Журналдағы алғашқы жазба: нысанның атауы, белгісі мен сипаттамалары 2026 жылғы 6 қыркүйекте құжаттардың хэштерімен бірге тіркелген. Технология ең алдымен өзінің шыққан тегін дәлелдейді.</span>
+        </p>
+        <a href="/cyrqode/r/0199a3f7-8c21-7d4e-b6a9-2f5e8c1d4a70/" class="text-sm text-[#00D4FF] hover:underline">
+          <span class="lang-en">Open the record →</span>
+          <span class="lang-ru">Открыть запись →</span>
+          <span class="lang-kz">Жазбаны ашу →</span>
+        </a>
       </div>
       <div class="neon-edge rounded-xl p-4">
-        <div class="text-[#00D4FF] font-semibold text-sm mb-2">Два профиля событий</div>
-        <p class="text-sm text-gray-400 mb-3">В репозитории лежат примеры событий вне
-        производственной вертикали: <code>document.signed.v1</code> с квалифицированной
-        электронной подписью и <code>manufacturing.batch.produced.v1</code> с
-        пастеризацией, ревизией техкарты и лабораторным заключением.</p>
-        <p class="text-xs text-gray-500">Ядро протокола отраслево-нейтрально:
-        производственные поля живут в отдельном профиле, ядро о них не знает.</p>
+        <div class="text-[#00D4FF] font-semibold text-sm mb-2">
+          <span class="lang-en">Two event profiles</span>
+          <span class="lang-ru">Два профиля событий</span>
+          <span class="lang-kz">Екі оқиға профилі</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-3">
+          <span class="lang-en">The repository holds examples of events outside the production vertical: <code>document.signed.v1</code> with a qualified electronic signature and <code>manufacturing.batch.produced.v1</code> with pasteurisation, a revision of the process sheet and a laboratory report.</span>
+          <span class="lang-ru">В репозитории лежат примеры событий вне производственной вертикали: <code>document.signed.v1</code> с квалифицированной электронной подписью и <code>manufacturing.batch.produced.v1</code> с пастеризацией, ревизией техкарты и лабораторным заключением.</span>
+          <span class="lang-kz">Репозиторийде өндіріс саласынан тыс оқиға үлгілері бар: <code>document.signed.v1</code> — аттестатталған электрондық қолтаңбамен, <code>manufacturing.batch.produced.v1</code> — пастеризациямен, технологиялық карта нұсқасымен және зертхана қорытындысымен.</span>
+        </p>
+        <p class="text-xs text-gray-500">
+          <span class="lang-en">The protocol core is industry-neutral: manufacturing fields live in a separate profile, the core knows nothing about them.</span>
+          <span class="lang-ru">Ядро протокола отраслево-нейтрально: производственные поля живут в отдельном профиле, ядро о них не знает.</span>
+          <span class="lang-kz">Протокол ядросы салаға бейтарап: өндіріс өрістері бөлек профильде тұрады, ядро оларды білмейді.</span>
+        </p>
       </div>
     </div>
   </section>
 
   <!-- ============ ГРАНИЦЫ ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">Что публично, а что нет</h2>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">
+      <span class="lang-en">What is public and what is not</span>
+      <span class="lang-ru">Что публично, а что нет</span>
+      <span class="lang-kz">Қайсысы ашық, қайсысы жабық</span>
+    </h2>
     <p class="text-sm text-gray-400 mb-4">
-      Ошибка в этой границе необратима: выпущенное под свободной лицензией не
-      отзывается, а попавшие в публичный репозиторий данные остаются в истории git
-      навсегда, даже если файл удалить.
+      <span class="lang-en">A mistake at this boundary is irreversible: what has been released under a free licence cannot be withdrawn, and data that has landed in a public repository stays in git history forever, even if the file is deleted.</span>
+      <span class="lang-ru">Ошибка в этой границе необратима: выпущенное под свободной лицензией не отзывается, а попавшие в публичный репозиторий данные остаются в истории git навсегда, даже если файл удалить.</span>
+      <span class="lang-kz">Бұл шекарадағы қате қайтарылмас: еркін лицензиямен шығарылғанды кейін қайтарып алуға болмайды, ал ашық репозиторийге түскен деректер git тарихында мәңгілік қалады, файл жойылса да.</span>
     </p>
     <div class="grid sm:grid-cols-2 gap-3 text-sm mb-4">
       <div class="rounded-xl p-4 bg-white/5 border border-[rgba(0,212,255,.3)]">
-        <span class="pill open mb-2">Открыто</span>
-        <p class="text-gray-300 mb-2">Спецификация протокола, схемы, тестовые векторы,
-        клиентские библиотеки, генератор знака, сканер и демонстрационные записи
-        реестра.</p>
-        <p class="text-xs text-gray-500">Спецификация и схемы — CC BY 4.0, код — Apache 2.0.</p>
+        <span class="pill open mb-2 lang-en">Open</span>
+        <span class="pill open mb-2 lang-ru">Открыто</span>
+        <span class="pill open mb-2 lang-kz">Ашық</span>
+        <p class="text-gray-300 mb-2">
+          <span class="lang-en">The protocol specification, schemas, test vectors, client libraries, the mark generator, the scanner and demonstrational registry records.</span>
+          <span class="lang-ru">Спецификация протокола, схемы, тестовые векторы, клиентские библиотеки, генератор знака, сканер и демонстрационные записи реестра.</span>
+          <span class="lang-kz">Протокол спецификациясы, схемалар, тест векторлары, клиент кітапханалары, белгі генераторы, сканер және көрсеткіш үшін арналған реестр жазбалары.</span>
+        </p>
+        <p class="text-xs text-gray-500">
+          <span class="lang-en">Specification and schemas — CC BY 4.0, code — Apache 2.0.</span>
+          <span class="lang-ru">Спецификация и схемы — CC BY 4.0, код — Apache 2.0.</span>
+          <span class="lang-kz">Спецификация мен схемалар — CC BY 4.0, код — Apache 2.0.</span>
+        </p>
       </div>
       <div class="rounded-xl p-4 bg-white/5 border border-[rgba(216,27,255,.3)]">
-        <span class="pill shut mb-2">Приватно</span>
-        <p class="text-gray-300 mb-2">Ядро журнала, резолвер, проекции и агрегаты,
-        политики доступа, эксплуатация.</p>
-        <p class="text-xs text-gray-500">Это сервис, а не протокол: на нём живут
-        данные конкретных субъектов.</p>
+        <span class="pill shut mb-2 lang-en">Private</span>
+        <span class="pill shut mb-2 lang-ru">Приватно</span>
+        <span class="pill shut mb-2 lang-kz">Жеке</span>
+        <p class="text-gray-300 mb-2">
+          <span class="lang-en">The ledger core, the resolver, projections and aggregates, access policies, operations.</span>
+          <span class="lang-ru">Ядро журнала, резолвер, проекции и агрегаты, политики доступа, эксплуатация.</span>
+          <span class="lang-kz">Журнал ядросы, резолвер, проекциялар мен агрегаттар, қолжетімділік саясаттары, эксплуатация.</span>
+        </p>
+        <p class="text-xs text-gray-500">
+          <span class="lang-en">This is a service, not a protocol: it holds the data of specific legal entities.</span>
+          <span class="lang-ru">Это сервис, а не протокол: на нём живут данные конкретных субъектов.</span>
+          <span class="lang-kz">Бұл протокол емес, қызмет: онда нақты субъектілердің деректері сақталады.</span>
+        </p>
       </div>
     </div>
     <p class="text-sm text-gray-400">
-      Правило при сомнении: <strong class="text-white">относится к протоколу —
-      публично, относится к эксплуатации — приватно.</strong> Открыть закрытое можно
-      в любой момент. Закрыть открытое — нельзя.
+      <span class="lang-en">The rule in case of doubt: <strong class="text-white">if it belongs to the protocol — public, if it belongs to operations — private.</strong> You can open the closed at any time. You cannot close the open.</span>
+      <span class="lang-ru">Правило при сомнении: <strong class="text-white">относится к протоколу — публично, относится к эксплуатации — приватно.</strong> Открыть закрытое можно в любой момент. Закрыть открытое — нельзя.</span>
+      <span class="lang-kz">Күмән туғанда қолданылатын ереже: <strong class="text-white">протоколға қатыстысы — ашық, пайдалануға қатыстысы — жеке.</strong> Жабық нәрсені кез келген уақытта ашуға болады. Ашық болғанды қайта жабу мүмкін емес.</span>
     </p>
   </section>
 
   <!-- ============ ДВА ПРИНЦИПА ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">Два принципа, определяющие всё остальное</h2>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">
+      <span class="lang-en">Two principles that determine everything else</span>
+      <span class="lang-ru">Два принципа, определяющие всё остальное</span>
+      <span class="lang-kz">Қалған бәрін айқындайтын екі принцип</span>
+    </h2>
     <p class="text-sm text-gray-300 mb-3">
-      <strong class="text-white">Первый: ядро отраслево-нейтрально.</strong>
-      Производство — первый и самый насыщенный потребитель, но не предмет протокола.
-      Производственные поля живут в отдельном профиле, ядро о них не знает. Так же
-      подключаются логистика, документооборот, любая другая область.
+      <span class="lang-en"><strong class="text-white">First: the core is industry-neutral.</strong> Manufacturing is the first and most saturated consumer, but not the subject of the protocol. Manufacturing fields live in a separate profile, the core knows nothing about them. Logistics, document management and any other domain connect the same way.</span>
+      <span class="lang-ru"><strong class="text-white">Первый: ядро отраслево-нейтрально.</strong> Производство — первый и самый насыщенный потребитель, но не предмет протокола. Производственные поля живут в отдельном профиле, ядро о них не знает. Так же подключаются логистика, документооборот, любая другая область.</span>
+      <span class="lang-kz"><strong class="text-white">Біріншісі: ядро салаға бейтарап.</strong> Өндіріс — бірінші әрі ең қанық тұтынушы, бірақ протоколдың пәні емес. Өндіріс өрістері бөлек профильде тұрады, ядро оларды білмейді. Логистика, құжат айналымы және кез келген басқа сала да солай қосылады.</span>
     </p>
     <p class="text-sm text-gray-300">
-      <strong class="text-white">Второй: персональные данные в журнал не попадают.</strong>
-      Событие ссылается на идентификатор сущности, а не на человека. Кто именно скрыт
-      за идентификатором — знает только владелец данных в своей системе. Технология
-      при этом способна доказать, что действие совершила сущность с нужным допуском в
-      нужное время, — не зная ни имени, ни должности.
+      <span class="lang-en"><strong class="text-white">Second: personal data never enters the ledger.</strong> An event refers to an entity identifier, not to a person. Who exactly hides behind the identifier is known only to the data owner in their own system. The technology is still able to prove that the action was performed by an entity with the proper permit at the proper time — knowing neither the name nor the position.</span>
+      <span class="lang-ru"><strong class="text-white">Второй: персональные данные в журнал не попадают.</strong> Событие ссылается на идентификатор сущности, а не на человека. Кто именно скрыт за идентификатором — знает только владелец данных в своей системе. Технология при этом способна доказать, что действие совершила сущность с нужным допуском в нужное время, — не зная ни имени, ни должности.</span>
+      <span class="lang-kz"><strong class="text-white">Екіншісі: жеке деректер журналға енбейді.</strong> Оқиға адамға емес, нысан идентификаторына сілтеме жасайды. Идентификатордың артында кім тұрғанын тек дерек иесі өз жүйесінде біледі. Технология соған қарамастан, әрекетті тиісті рұқсат бар нысан тиісті уақытта жасағанын дәлелдей алады — есімін де, лауазымын да білмей.</span>
     </p>
   </section>
 
   <!-- ============ КАК ПОДКЛЮЧИТЬСЯ ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">Как подключиться</h2>
-    <p class="text-sm text-gray-400 mb-4">Три способа. Граница проходит ровно там,
-    где кончается формат и начинается хранение.</p>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">
+      <span class="lang-en">How to connect</span>
+      <span class="lang-ru">Как подключиться</span>
+      <span class="lang-kz">Қалай қосылуға болады</span>
+    </h2>
+    <p class="text-sm text-gray-400 mb-4">
+      <span class="lang-en">Three ways. The boundary runs exactly where the format ends and storage begins.</span>
+      <span class="lang-ru">Три способа. Граница проходит ровно там, где кончается формат и начинается хранение.</span>
+      <span class="lang-kz">Үш жол. Шекара пішім аяқталып, сақтау басталған жерден дәл өтеді.</span>
+    </p>
     <div class="space-y-3 text-sm mb-5">
       <div class="neon-edge rounded-xl p-4">
-        <div class="text-[#00D4FF] font-semibold mb-1">1. Только метки, без журнала</div>
-        <p class="text-gray-400">Вы генерируете знаки и читаете их у себя, резолвя в
-        собственную систему. Никаких договорённостей ни с кем не нужно — лицензии
-        это позволяют.</p>
+        <div class="text-[#00D4FF] font-semibold mb-1">
+          <span class="lang-en">1. Marks only, no ledger</span>
+          <span class="lang-ru">1. Только метки, без журнала</span>
+          <span class="lang-kz">1. Тек белгілер, журналсыз</span>
+        </div>
+        <p class="text-gray-400">
+          <span class="lang-en">You generate marks and read them yourself, resolving them into your own system. No agreements with anyone are needed — the licences allow it.</span>
+          <span class="lang-ru">Вы генерируете знаки и читаете их у себя, резолвя в собственную систему. Никаких договорённостей ни с кем не нужно — лицензии это позволяют.</span>
+          <span class="lang-kz">Белгілерді өзіңіз жасап, өз жүйеңізде оқи аласыз. Ешкіммен келісім жасаудың қажеті жоқ — лицензиялар бұған рұқсат береді.</span>
+        </p>
       </div>
       <div class="neon-edge rounded-xl p-4">
-        <div class="text-[#00D4FF] font-semibold mb-1">2. Свой журнал по нашему протоколу</div>
-        <p class="text-gray-400">Вы реализуете хранение сами, но соблюдаете формат
-        события, канонизацию и подпись. Тогда ваши события сможет проверить любая
-        совместимая сторона, а ваши метки прочтёт чужой сканер.</p>
+        <div class="text-[#00D4FF] font-semibold mb-1">
+          <span class="lang-en">2. Your own ledger on our protocol</span>
+          <span class="lang-ru">2. Свой журнал по нашему протоколу</span>
+          <span class="lang-kz">2. Біздің протокол бойынша өз журналыңыз</span>
+        </div>
+        <p class="text-gray-400">
+          <span class="lang-en">You implement storage yourself, but follow the event format, canonicalization and signature. Then any compatible party can verify your events, and a foreign scanner can read your marks.</span>
+          <span class="lang-ru">Вы реализуете хранение сами, но соблюдаете формат события, канонизацию и подпись. Тогда ваши события сможет проверить любая совместимая сторона, а ваши метки прочтёт чужой сканер.</span>
+          <span class="lang-kz">Сақтауды өзіңіз іске асырасыз, бірақ оқиға пішіміне, канондауға және қолтаңбаға сай боласыз. Сонда кез келген үйлесімді жақ оқиғаларыңызды тексере алады, ал белгіларыңызды басқа сканер оқи алады.</span>
+        </p>
       </div>
       <div class="neon-edge-magenta rounded-xl p-4">
-        <div class="text-[#D81BFF] font-semibold mb-1">3. Наш журнал</div>
-        <p class="text-gray-400">Вы отправляете события в сервис CYRQODE и пользуетесь
-        готовым резолвером. Здесь понадобится доступ: адрес сервиса, идентификатор
-        пространства имён и учётные данные. Это уже договорная часть.</p>
+        <div class="text-[#D81BFF] font-semibold mb-1">
+          <span class="lang-en">3. Our ledger</span>
+          <span class="lang-ru">3. Наш журнал</span>
+          <span class="lang-kz">3. Біздің журнал</span>
+        </div>
+        <p class="text-gray-400">
+          <span class="lang-en">You send events to the CYRQODE service and use the ready resolver. Here access is required: the service address, the namespace identifier and credentials. That is already the contractual part.</span>
+          <span class="lang-ru">Вы отправляете события в сервис CYRQODE и пользуетесь готовым резолвером. Здесь понадобится доступ: адрес сервиса, идентификатор пространства имён и учётные данные. Это уже договорная часть.</span>
+          <span class="lang-kz">Оқиғаларды CYRQODE қызметіне жіберіп, дайын резолверді қолданасыз. Ол үшін қызмет мекенжайы, атаулар кеңістігінің идентификаторы және тіркелгі деректері қажет. Бұл — келісімшартқа қатысты бөлік.</span>
+        </p>
       </div>
     </div>
-    <p class="text-sm text-gray-300 mb-3">Что нужно приготовить в любом случае:</p>
+    <p class="text-sm text-gray-300 mb-3">
+      <span class="lang-en">What you need to prepare in any case:</span>
+      <span class="lang-ru">Что нужно приготовить в любом случае:</span>
+      <span class="lang-kz">Кез келген жағдайда дайындау керек:</span>
+    </p>
     <ol class="text-sm text-gray-400 list-decimal pl-5 space-y-1 mb-5">
-      <li><strong class="text-white">Каноническим</strong> — сериализация по RFC 8785,
-      побайтово совпадающая с векторами.</li>
-      <li><strong class="text-white">Подписанным</strong> — <code>ed25519-sha256-v1</code>
-      или <code>ecdsa-p256-sha256-v1</code>.</li>
-      <li><strong class="text-white">Со ссылками на причины</strong> — событие не висит
-      в воздухе, оно указывает, из чего и по чьим полномочиям произошло.</li>
-      <li><strong class="text-white">Без персональных данных</strong> — только
-      идентификаторы сущностей.</li>
+      <li>
+        <span class="lang-en"><strong class="text-white">Canonical</strong> — serialization per RFC 8785, byte-identical to the vectors.</span>
+        <span class="lang-ru"><strong class="text-white">Каноническим</strong> — сериализация по RFC 8785, побайтово совпадающая с векторами.</span>
+        <span class="lang-kz"><strong class="text-white">Канонды</strong> — RFC 8785 бойынша сериализация, векторлармен байт дәл сәйкес.</span>
+      </li>
+      <li>
+        <span class="lang-en"><strong class="text-white">Signed</strong> — <code>ed25519-sha256-v1</code> or <code>ecdsa-p256-sha256-v1</code>.</span>
+        <span class="lang-ru"><strong class="text-white">Подписанным</strong> — <code>ed25519-sha256-v1</code> или <code>ecdsa-p256-sha256-v1</code>.</span>
+        <span class="lang-kz"><strong class="text-white">Қолтаңбаланған</strong> — <code>ed25519-sha256-v1</code> немесе <code>ecdsa-p256-sha256-v1</code>.</span>
+      </li>
+      <li>
+        <span class="lang-en"><strong class="text-white">With cause references</strong> — an event does not hang in the air, it points to what it came from and under whose authority.</span>
+        <span class="lang-ru"><strong class="text-white">Со ссылками на причины</strong> — событие не висит в воздухе, оно указывает, из чего и по чьим полномочиям произошло.</span>
+        <span class="lang-kz"><strong class="text-white">Себеп сілтемелерімен</strong> — оқиға бос аспанда тұрмайды, оның неден және кімнің өкілетімен пайда болғанын көрсетеді.</span>
+      </li>
+      <li>
+        <span class="lang-en"><strong class="text-white">Without personal data</strong> — entity identifiers only.</span>
+        <span class="lang-ru"><strong class="text-white">Без персональных данных</strong> — только идентификаторы сущностей.</span>
+        <span class="lang-kz"><strong class="text-white">Жеке деректерсіз</strong> — тек нысан идентификаторлары.</span>
+      </li>
     </ol>
     <p class="text-sm text-gray-400 mb-4">
-      Канонизация обязана совпадать побайтово: событие сериализуется детерминированно,
-      от результата берётся хэш, хэш подписывается. Иначе сортируете ключи или иначе
-      представляете числа — подпись не сойдётся, и журнал отклонит событие.
+      <span class="lang-en">Canonicalization must match byte for byte: the event is serialized deterministically, a hash is taken of the result, the hash is signed. Otherwise you sort the keys differently or represent numbers differently — the signature will not match, and the ledger will reject the event.</span>
+      <span class="lang-ru">Канонизация обязана совпадать побайтово: событие сериализуется детерминированно, от результата берётся хэш, хэш подписывается. Иначе сортируете ключи или иначе представляете числа — подпись не сойдётся, и журнал отклонит событие.</span>
+      <span class="lang-kz">Канондау байт деңгейінде дәл сәйкес болуы керек: оқиға детерминдік түрде сериалданады, нәтижеден хэш есептеледі, содан кейін хэшке қол қойылады. Кілттерді басқа ретпен сұрыптасаңыз немесе сандарды басқаша жазсаңыз, қолтаңбалар сәйкес келмей, журнал оқиғаны қабылдамайды.</span>
     </p>
     <div class="neon-edge rounded-xl p-4">
-      <p class="text-sm text-gray-300 mb-2">Пишете свой SDK? Начните с одной команды —
-      она сверит вашу канонизацию с эталоном:</p>
+      <p class="text-sm text-gray-300 mb-2">
+        <span class="lang-en">Writing your own SDK? Start with one command — it will check your canonicalization against the reference:</span>
+        <span class="lang-ru">Пишете свой SDK? Начните с одной команды — она сверит вашу канонизацию с эталоном:</span>
+        <span class="lang-kz">Өз SDK-ңызды жазып жүрсіз бе? Бір командадан бастаңыз — ол сіздің канондауыңызды эталонмен салыстырады:</span>
+      </p>
       <pre class="text-xs text-[#00D4FF] overflow-x-auto"><code>git clone https://github.com/Kabzhanov/cyrqode &amp;&amp; cd cyrqode
 python3 test-vectors/verify.py</code></pre>
-      <p class="text-xs text-gray-500 mt-2">Релиз 0.x: до версии 1.0 возможны правки,
-      обратная совместимость не гарантируется. Привязывайтесь к конкретному коммиту,
-      а не к «последней версии».</p>
+      <p class="text-xs text-gray-500 mt-2">
+        <span class="lang-en">Release 0.x: changes are possible before version 1.0, backward compatibility is not guaranteed. Pin to a specific commit rather than to “the latest version”.</span>
+        <span class="lang-ru">Релиз 0.x: до версии 1.0 возможны правки, обратная совместимость не гарантируется. Привязывайтесь к конкретному коммиту, а не к «последней версии».</span>
+        <span class="lang-kz">0.x нұсқасы: 1.0 дейін өзгертулер мүмкін, кері үйлесімділік кепілдендірілмейді. «Соңғы нұсқаға» емес, нақты коммитке бекітіңіз.</span>
+      </p>
     </div>
   </section>
 
   <!-- ============ ЧЕСТНО О СТАТУСЕ ============ -->
   <section class="card">
-    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">Честно о статусе</h2>
+    <h2 class="text-xl font-semibold text-[#00D4FF] mb-3">
+      <span class="lang-en">Honestly about the status</span>
+      <span class="lang-ru">Честно о статусе</span>
+      <span class="lang-kz">Жоба мәртебесі туралы ашық</span>
+    </h2>
     <p class="text-sm text-gray-300 mb-3">
-      <strong class="text-white">Опубликованный релиз v0.1.0; возможны правки.</strong>
-      Спецификация открыта для реализации. До версии 1.0 формат события и схемы могут
-      измениться, в том числе ужесточиться; обратная совместимость не гарантируется.
-      Физический формат знака (геометрия, ёмкость, коррекция ошибок) в генераторе
-      работает, но помечен как проектный: финальные значения устанавливаются
-      лабораторными испытаниями печати и считывания. До них обещать процент
-      читаемости повреждённой метки было бы враньём.
+      <span class="lang-en"><strong class="text-white">Published release v0.1.0; changes are possible.</strong> The specification is open for implementation. Before version 1.0 the event format and schemas may change, including becoming stricter; backward compatibility is not guaranteed. The physical mark format (geometry, capacity, error correction) works in the generator, but is marked as provisional: the final values will be established by laboratory printing and reading tests. Until then, promising a legibility rate for a damaged mark would be lying.</span>
+      <span class="lang-ru"><strong class="text-white">Опубликованный релиз v0.1.0; возможны правки.</strong> Спецификация открыта для реализации. До версии 1.0 формат события и схемы могут измениться, в том числе ужесточиться; обратная совместимость не гарантируется. Физический формат знака (геометрия, ёмкость, коррекция ошибок) в генераторе работает, но помечен как проектный: финальные значения устанавливаются лабораторными испытаниями печати и считывания. До них обещать процент читаемости повреждённой метки было бы враньём.</span>
+      <span class="lang-kz"><strong class="text-white">Жарияланған релиз v0.1.0; өзгертулер мүмкін.</strong> Спецификация іске асыруға ашық. 1.0 нұсқасына дейін оқиға пішімі мен схемалар өзгеруі мүмкін, тіпті қатаюы да — кері үйлесімділік кепілденбейді. Белгінің физикалық пішімі (геометрия, сыйымдылық, қате түзету) генераторда жұмыс істейді, бірақ жоба ретінде белгіленген: түпкі мәндер зертханалық басып шығару және оқу сынақтарымен анықталады. Оларға дейін бүлінген белгінің оқылу мүмкіндігін уәде ету өтірік болар еді.</span>
     </p>
     <p class="text-sm text-gray-400">
-      Внешние свидетельства и распределённая проверка — более поздний слой. Сейчас
-      доказательность ограничена уровнями «подписано автором» и «принято авторитетным
-      журналом». Этого достаточно для спора между сторонами, у которых есть общий
-      журнал, и недостаточно для доказательства третьей стороне без него.
+      <span class="lang-en">External witnesses and distributed verification are a later layer. For now the provability is limited to the levels “signed by the author” and “accepted by an authoritative ledger”. That is enough for a dispute between parties who share a ledger, and not enough to prove anything to a third party without one.</span>
+      <span class="lang-ru">Внешние свидетельства и распределённая проверка — более поздний слой. Сейчас доказательность ограничена уровнями «подписано автором» и «принято авторитетным журналом». Этого достаточно для спора между сторонами, у которых есть общий журнал, и недостаточно для доказательства третьей стороне без него.</span>
+      <span class="lang-kz">Сыртқы куәгерлер мен үлестірілген тексеру — кейінгі кезең. Әзірге дәлелдеу мүмкіндігі «автор қол қойған» және «беделді журнал қабылдаған» деңгейлерімен шектеледі. Бұл ортақ журналы бар тараптар арасындағы дауға жеткілікті, бірақ ондай журналы жоқ үшінші тарапқа дәлелдеуге жеткіліксіз.</span>
     </p>
   </section>
 
@@ -498,22 +817,116 @@ python3 test-vectors/verify.py</code></pre>
 
 <footer class="max-w-5xl mx-auto px-5 pb-12 pt-2 border-t border-white/10">
   <p class="text-xs text-gray-500 mb-2">
-    CYRQODE™ — товарный знак BizDNAi. Технически совместимую реализацию можно
-    делать и называть совместимой.
+    <span class="lang-en">CYRQODE™ is a BizDNAi trademark. A technically compatible implementation may be built and called compatible.</span>
+    <span class="lang-ru">CYRQODE™ — товарный знак BizDNAi. Технически совместимую реализацию можно делать и называть совместимой.</span>
+    <span class="lang-kz">CYRQODE™ — BizDNAi сауда белгісі. Техникалық үйлесімді іске асыруды жасап, үйлесімді деп атауға болады.</span>
   </p>
   <p class="text-xs text-gray-500 mb-4">
-    Тексты страницы — из <code>README.md</code>, <code>BOUNDARIES.md</code>,
-    <code>registry/README.md</code>, <code>docs/integrate.md</code> и
-    <code>examples/</code> открытого репозитория <code>cyrqode</code> (CC BY 4.0).
+    <span class="lang-en">Page texts are taken from <code>README.md</code>, <code>BOUNDARIES.md</code>, <code>registry/README.md</code>, <code>docs/integrate.md</code> and <code>examples/</code> of the open repository <code>cyrqode</code> (CC BY 4.0).</span>
+    <span class="lang-ru">Тексты страницы — из <code>README.md</code>, <code>BOUNDARIES.md</code>, <code>registry/README.md</code>, <code>docs/integrate.md</code> и <code>examples/</code> открытого репозитория <code>cyrqode</code> (CC BY 4.0).</span>
+    <span class="lang-kz">Бет мәтіндері ашық <code>cyrqode</code> репозиторийінің <code>README.md</code>, <code>BOUNDARIES.md</code>, <code>registry/README.md</code>, <code>docs/integrate.md</code> және <code>examples/</code> файлдарынан алынған (CC BY 4.0).</span>
+  </p>
+  <p class="text-xs mb-4">
+    <a class="text-[#00D4FF] hover:underline" href="https://github.com/Kabzhanov/cyrqode" rel="noopener" target="_blank">
+      <span class="lang-en">Sources on GitHub</span>
+      <span class="lang-ru">Исходники на GitHub</span>
+      <span class="lang-kz">Бастапқы код GitHub-та</span>
+    </a>
+    <span class="text-gray-600 mx-2">·</span>
+    <a class="text-[#00D4FF] hover:underline" href="https://bizdnai.com/privacy-policy/">
+      <span class="lang-en">Privacy policy</span>
+      <span class="lang-ru">Политика конфиденциальности</span>
+      <span class="lang-kz">Құпиялылық саясаты</span>
+    </a>
   </p>
   <div class="flex items-center gap-3">
     <img src="/cyrqode/assets/bizdnai-logo.png" width="28" height="28" loading="lazy" decoding="async" alt="BizDNAi">
-    <span class="text-xs text-gray-500">Технология BizDNAi</span>
+    <span class="text-xs text-gray-500">
+      <span class="lang-en">BizDNAi technology</span>
+      <span class="lang-ru">Технология BizDNAi</span>
+      <span class="lang-kz">BizDNAi технологиясы</span>
+    </span>
   </div>
 </footer>
 
 </div>
 
 <script src="/neural-bg.js"></script>
+<script>
+/* Переключатель языка EN → RU → KZ → EN.
+   Тот же контракт, что на главной: bizdnaii_site_lang в localStorage,
+   дублируем в bizdnaii_widget_lang, шлём событие
+   bizdnaii-language-change с detail.language и синхронизируем
+   html lang и body data-lang. Тяжёлый общий site-i18n.js здесь не нужен
+   и намеренно не подключается — страница самодостаточна. */
+(function () {
+  var ORDER = ['en', 'ru', 'kz'];
+  var LS_SITE = 'bizdnaii_site_lang';
+  var LS_WIDGET = 'bizdnaii_widget_lang';
+  var LABEL = { en: 'EN', ru: 'RU', kz: 'KZ' };
+  var META = {
+    en: {
+      title: 'CYRQODE — a mark you can use to prove what really happened',
+      description: 'CYRQODE: one mark on a product — and behind it the whole story: what it is made of, who made it, on which equipment, under whose approval. Open protocol, working scanner and mark generator.'
+    },
+    ru: {
+      title: 'CYRQODE — болған оқиғаны дәлелдеуге арналған белгі',
+      description: 'CYRQODE: один знак на предмете — и за ним вся история: из чего сделано, кем, на каком оборудовании, по чьему допуску. Открытый протокол, рабочий сканер и генератор знака.'
+    },
+    kz: {
+      title: 'CYRQODE — шындығында не болғанын дәлелдейтін белгі',
+      description: 'CYRQODE: өнімге бір белгі — ал оның артында толық тарих: неден жасалған, кім жасаған, қандай жабдықта, кімнің рұқсатымен. Ашық протокол, жұмыс істейтін сканер және белгі генераторы.'
+    }
+  };
+
+  var btn = document.getElementById('cyrqode-lang-switch');
+  var htmlEl = document.documentElement;
+  var body = document.body;
+
+  function readLang() {
+    var v = null;
+    try { v = localStorage.getItem(LS_SITE); } catch (e) { v = null; }
+    return ORDER.indexOf(v) > -1 ? v : 'en';
+  }
+
+  function apply(lang, persist) {
+    if (ORDER.indexOf(lang) === -1) lang = 'en';
+    htmlEl.setAttribute('lang', lang);
+    htmlEl.setAttribute('data-lang', lang);
+    if (body) body.setAttribute('data-lang', lang);
+    if (btn) btn.textContent = LABEL[lang];
+    // alt-тексты картинок тоже переводные: базовый alt — английский
+    // (как и fallback языка), ru/kz лежат в data-alt-*.
+    var imgs = document.querySelectorAll('img[data-alt-' + lang + ']');
+    for (var i = 0; i < imgs.length; i++) {
+      imgs[i].setAttribute('alt', imgs[i].getAttribute('data-alt-' + lang));
+    }
+    if (META[lang]) {
+      document.title = META[lang].title;
+      var md = document.querySelector('meta[name="description"]');
+      if (md) md.setAttribute('content', META[lang].description);
+    }
+    if (persist) {
+      try {
+        localStorage.setItem(LS_SITE, lang);
+        localStorage.setItem(LS_WIDGET, lang);
+      } catch (e) { /* приватный режим — просто молча работаем дальше */ }
+    }
+    try {
+      window.dispatchEvent(new CustomEvent('bizdnaii-language-change', { detail: { language: lang } }));
+    } catch (e) { /* IE и подобные — событие необязательно */ }
+  }
+
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var cur = htmlEl.getAttribute('data-lang');
+      if (ORDER.indexOf(cur) === -1) cur = 'en';
+      apply(ORDER[(ORDER.indexOf(cur) + 1) % ORDER.length], true);
+    });
+  }
+
+  apply(readLang(), false);
+})();
+</script>
 </body>
 </html>
